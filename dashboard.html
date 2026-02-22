@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard – SoilSense</title>
+    <meta name="description"
+        content="Live soil sensor readings dashboard with real-time moisture, pH, NPK, temperature and humidity data." />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/dashboard.css" />
+    <link rel="stylesheet" href="styles/chatbot.css" />
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="brand-icon">🌱</div>
+            Soil<span>Sense</span>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"
+            aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">🏠 Home</a></li>
+            <li><a href="dashboard.html" class="active">📊 Dashboard</a></li>
+            <li><a href="analytics.html">📈 Analytics</a></li>
+            <li><a href="recommendations.html">🧠 Recommendations</a></li>
+            <li><a href="about.html">ℹ️ About</a></li>
+        </ul>
+        <div class="nav-user">
+            <div class="nav-user-badge" id="navUserBadge" style="display:none">
+                👨‍🌾 <span id="navUserName">Farmer</span>
+            </div>
+            <button class="btn-login-nav" id="navLoginBtn" onclick="location.href='login.html'">Login</button>
+            <button class="btn-logout" id="navLogoutBtn" style="display:none" onclick="doLogout()">Logout</button>
+        </div>
+    </nav>
+
+    <main class="page-wrapper">
+        <div class="container">
+            <!-- Page Title -->
+            <div class="page-title-bar fade-up">
+                <div class="label">📊 Live Monitoring</div>
+                <h1>Soil Health Dashboard</h1>
+                <p id="farmSubtitle">Real-time sensor readings from your ESP32 system · Auto-refreshes every 5 seconds
+                </p>
+            </div>
+
+            <!-- Alerts -->
+            <div class="alerts-container" id="alertsContainer"></div>
+
+            <!-- Status Bar -->
+            <div class="dashboard-status-bar fade-up">
+                <div class="status-info">
+                    <span class="status-dot online pulse"></span>
+                    <strong>ESP32 Connected</strong> · Wi-Fi Signal: Strong
+                </div>
+                <div class="status-info">
+                    <span>📍 Field Sensor 1</span>
+                    <span id="lastUpdatedTime" class="refresh-timer">Updating...</span>
+                </div>
+                <div class="status-info">
+                    <span>🔄 Next refresh in <span id="countdown">5</span>s</span>
+                </div>
+            </div>
+
+            <!-- Crop Selector -->
+            <div class="crop-selector-panel fade-up">
+                <label>🌾 Select Crop:</label>
+                <div class="crop-chips" id="cropChips"></div>
+            </div>
+
+            <!-- Sensor Cards Grid -->
+            <div class="dashboard-grid" id="sensorGrid">
+
+                <!-- Moisture Card -->
+                <div class="card sensor-card fade-up" id="moistureCard"
+                    style="--card-accent:var(--blue-500);--icon-bg:rgba(59,130,246,.12)">
+                    <div class="sensor-card-header">
+                        <div>
+                            <div class="sensor-label">Soil Moisture</div>
+                            <div class="sensor-value"><span id="moistureVal">--</span><span class="sensor-unit">%</span>
+                            </div>
+                        </div>
+                        <div class="sensor-icon">💧</div>
+                    </div>
+                    <div class="sensor-progress-wrap">
+                        <div class="sensor-progress-labels"><span>Dry</span><span>Ideal</span><span>Wet</span></div>
+                        <div class="progress-wrap">
+                            <div class="progress-fill" id="moistureBar" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div class="threshold-row">
+                        <span>Ideal for crop:</span><span class="ideal" id="moistureIdeal">-</span>
+                    </div>
+                    <div class="moisture-status" id="moistureStatus">Calculating...</div>
+                </div>
+
+                <!-- pH Card -->
+                <div class="card sensor-card fade-up fade-up-d1" id="phCard"
+                    style="--card-accent:var(--amber-500);--icon-bg:rgba(245,158,11,.12)">
+                    <div class="sensor-card-header">
+                        <div>
+                            <div class="sensor-label">Soil pH</div>
+                            <div class="sensor-value"><span id="phVal">--</span></div>
+                        </div>
+                        <div class="sensor-icon">🧪</div>
+                    </div>
+                    <div class="ph-scale-bar">
+                        <div class="ph-marker" id="phMarker"></div>
+                    </div>
+                    <div class="ph-scale-labels">
+                        <span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                    </div>
+                    <div class="ph-zone-label" id="phZone">Calculating...</div>
+                    <div class="threshold-row">
+                        <span>Ideal for crop:</span><span class="ideal" id="phIdeal">-</span>
+                    </div>
+                </div>
+
+                <!-- NPK Card (wide) -->
+                <div class="card sensor-card fade-up fade-up-d2" id="npkCard"
+                    style="--card-accent:var(--green-400);--icon-bg:rgba(56,163,82,.12)">
+                    <div class="sensor-card-header">
+                        <div>
+                            <div class="sensor-label">NPK Nutrients</div>
+                            <div style="font-size:.85rem;color:var(--text-muted);margin-top:.2rem">Nitrogen · Phosphorus
+                                · Potassium</div>
+                        </div>
+                        <div class="sensor-icon">🌿</div>
+                    </div>
+                    <div class="npk-grid">
+                        <div class="npk-item">
+                            <div class="npk-letter">N</div>
+                            <div class="npk-name">Nitrogen</div>
+                            <div class="npk-value-row">
+                                <span class="npk-number" id="nVal">--</span>
+                                <span class="npk-unit">mg/kg</span>
+                            </div>
+                            <div style="margin-top:.5rem" id="nBadge"></div>
+                        </div>
+                        <div class="npk-item">
+                            <div class="npk-letter">P</div>
+                            <div class="npk-name">Phosphorus</div>
+                            <div class="npk-value-row">
+                                <span class="npk-number" id="pVal">--</span>
+                                <span class="npk-unit">mg/kg</span>
+                            </div>
+                            <div style="margin-top:.5rem" id="pBadge"></div>
+                        </div>
+                        <div class="npk-item">
+                            <div class="npk-letter">K</div>
+                            <div class="npk-name">Potassium</div>
+                            <div class="npk-value-row">
+                                <span class="npk-number" id="kVal">--</span>
+                                <span class="npk-unit">mg/kg</span>
+                            </div>
+                            <div style="margin-top:.5rem" id="kBadge"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Temperature & Humidity Card -->
+                <div class="card sensor-card fade-up fade-up-d3"
+                    style="--card-accent:var(--red-500);--icon-bg:rgba(239,68,68,.12)">
+                    <div class="sensor-card-header">
+                        <div>
+                            <div class="sensor-label">Environment</div>
+                            <div style="font-size:.85rem;color:var(--text-muted);margin-top:.2rem">Temperature &
+                                Humidity</div>
+                        </div>
+                        <div class="sensor-icon">🌡️</div>
+                    </div>
+                    <div class="temp-humidity-grid">
+                        <div class="mini-metric">
+                            <div class="mini-metric-icon">🌡️</div>
+                            <div class="mini-metric-val"><span id="tempVal">--</span><span
+                                    style="font-size:1rem">°C</span></div>
+                            <div class="mini-metric-lbl">Temperature</div>
+                        </div>
+                        <div class="mini-metric">
+                            <div class="mini-metric-icon">💦</div>
+                            <div class="mini-metric-val"><span id="humVal">--</span><span
+                                    style="font-size:1rem">%</span></div>
+                            <div class="mini-metric-lbl">Humidity</div>
+                        </div>
+                    </div>
+                    <div class="threshold-row" style="margin-top:.85rem">
+                        <span>Ideal temp for crop:</span><span class="ideal" id="tempIdeal">-</span>
+                    </div>
+                </div>
+
+                <!-- Pump Status Card -->
+                <div class="card sensor-card pump-card fade-up"
+                    style="--card-accent:#3b82f6;--icon-bg:rgba(59,130,246,.12)">
+                    <div class="sensor-card-header">
+                        <div>
+                            <div class="sensor-label">Auto-Irrigation</div>
+                            <div style="font-size:.85rem;color:var(--text-muted);margin-top:.2rem">Water Pump Control
+                            </div>
+                        </div>
+                        <div class="sensor-icon">⚙️</div>
+                    </div>
+                    <div class="pump-status-display">
+                        <div class="pump-icon-wrap off" id="pumpIconWrap">💧</div>
+                        <div class="pump-details">
+                            <h4 class="off" id="pumpStatusText">PUMP OFF</h4>
+                            <div class="pump-meta" id="pumpMeta">Last watered: Never</div>
+                        </div>
+                    </div>
+                    <button class="pump-toggle-btn off" id="pumpToggleBtn" onclick="togglePump()">▶ Start
+                        Irrigation</button>
+                </div>
+
+                <!-- Soil Health Summary Card -->
+                <div class="card sensor-card fade-up fade-up-d1" style="--card-accent:var(--green-300)">
+                    <div class="sensor-card-header">
+                        <div>
+                            <div class="sensor-label">Overall Health</div>
+                            <div style="font-size:.85rem;color:var(--text-muted);margin-top:.2rem">AI Analysis Summary
+                            </div>
+                        </div>
+                        <div class="sensor-icon" style="background:rgba(56,163,82,.12)">🌟</div>
+                    </div>
+                    <div id="healthSummary" style="margin-top:.75rem">
+                        <div style="font-size:2.5rem;text-align:center;margin:1rem 0" id="healthEmoji">⏳</div>
+                        <div style="text-align:center;font-family:var(--font-head);font-size:1.2rem;font-weight:700;color:var(--text-primary)"
+                            id="healthLabel">Analyzing...</div>
+                        <div style="text-align:center;font-size:.82rem;color:var(--text-muted);margin-top:.4rem"
+                            id="healthSub">Please wait for first reading</div>
+                    </div>
+                    <a href="recommendations.html" style="display:block;margin-top:1.25rem">
+                        <button
+                            style="width:100%;padding:.65rem;background:rgba(56,163,82,.1);border:1px solid rgba(56,163,82,.25);border-radius:10px;color:var(--green-300);font-weight:600;cursor:pointer;font-size:.88rem">🧠
+                            View Full Recommendations →</button>
+                    </a>
+                </div>
+
+            </div><!-- /dashboard-grid -->
+
+            <div class="last-updated">
+                <span class="status-dot online" style="vertical-align:middle"></span>
+                Last reading: <span id="lastReadingTime">--</span> &nbsp;·&nbsp; Data: Simulated ESP32 Feed
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>🌱 <strong>SoilSense</strong> – ESP32 Smart Soil Monitoring System · <a href="index.html">Home</a> · <a
+                    href="analytics.html">Analytics</a></p>
+        </div>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script>
+        /* ── Auth ──────────────────────────────────────────────────── */
+        const userRaw = localStorage.getItem('soil_user');
+        if (userRaw) {
+            const u = JSON.parse(userRaw);
+            document.getElementById('navUserBadge').style.display = 'flex';
+            document.getElementById('navUserName').textContent = u.name;
+            document.getElementById('navLoginBtn').style.display = 'none';
+            document.getElementById('navLogoutBtn').style.display = 'inline-block';
+            document.getElementById('farmSubtitle').textContent =
+                `${u.farm} – Real-time sensor readings from your ESP32 system · Auto-refreshes every 5 seconds`;
+        }
+        function doLogout() {
+            localStorage.removeItem('soil_user');
+            location.reload();
+        }
+
+        /* ── Crop Chips ────────────────────────────────────────────── */
+        const SD = window.SoilData;
+        const chips = document.getElementById('cropChips');
+        Object.entries(SD.CROP_PROFILES).forEach(([key, p]) => {
+            const btn = document.createElement('button');
+            btn.className = 'crop-chip' + (SD.getCurrentCrop() === key ? ' active' : '');
+            btn.textContent = `${p.icon} ${p.name}`;
+            btn.dataset.crop = key;
+            btn.onclick = () => {
+                document.querySelectorAll('.crop-chip').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                SD.setCurrentCrop(key);
+            };
+            chips.appendChild(btn);
+        });
+
+        /* ── Countdown ─────────────────────────────────────────────── */
+        let countdownVal = 5;
+        setInterval(() => {
+            countdownVal = countdownVal <= 1 ? 5 : countdownVal - 1;
+            document.getElementById('countdown').textContent = countdownVal;
+        }, 1000);
+
+        /* ── Manual pump toggle ────────────────────────────────────── */
+        let manualPump = null;
+        function togglePump() {
+            manualPump = (manualPump === null) ? true : !manualPump;
+            updatePumpUI(manualPump, null, null);
+        }
+        function updatePumpUI(on, lastWatered, duration) {
+            const wrap = document.getElementById('pumpIconWrap');
+            const text = document.getElementById('pumpStatusText');
+            const btn = document.getElementById('pumpToggleBtn');
+            const meta = document.getElementById('pumpMeta');
+            wrap.className = 'pump-icon-wrap ' + (on ? 'on' : 'off');
+            text.className = on ? 'on' : 'off';
+            text.textContent = on ? '💧 PUMP ON' : 'PUMP OFF';
+            btn.className = 'pump-toggle-btn ' + (on ? 'on' : 'off');
+            btn.textContent = on ? '⏹ Stop Irrigation' : '▶ Start Irrigation';
+            if (lastWatered) {
+                const d = new Date(lastWatered);
+                meta.textContent = `Last watered: ${d.toLocaleTimeString()}` + (duration ? ` · ${duration} min` : '');
+            } else {
+                meta.textContent = 'Auto-irrigation ready';
+            }
+        }
+
+        /* ── Alert Renderer ────────────────────────────────────────── */
+        let alertsShown = new Set();
+        function renderAlerts(alerts) {
+            const container = document.getElementById('alertsContainer');
+            container.innerHTML = '';
+            alertsShown.clear();
+            alerts.slice(0, 3).forEach(a => {
+                const div = document.createElement('div');
+                div.className = 'alert-bar ' + (a.type === 'critical' ? 'alert-critical' : 'alert-warning');
+                div.innerHTML = `<span>${a.icon}</span> <strong>${a.category}:</strong> ${a.message}
+      <button class="alert-close" onclick="this.parentElement.remove()">✕</button>`;
+                container.appendChild(div);
+            });
+        }
+
+        /* ── Main Update ───────────────────────────────────────────── */
+        function updateDashboard(data) {
+            const crop = data.crop;
+            const p = SD.CROP_PROFILES[crop];
+
+            // Moisture
+            document.getElementById('moistureVal').textContent = data.moisture.toFixed(0);
+            const mc = SD.moistureColor(data.moisture, p);
+            const mBar = document.getElementById('moistureBar');
+            mBar.style.width = data.moisture + '%';
+            mBar.className = 'progress-fill progress-' + mc;
+            const ms = document.getElementById('moistureStatus');
+            ms.className = 'moisture-status ' + mc;
+            ms.textContent = mc === 'green' ? '✅ Optimal moisture level'
+                : mc === 'amber' ? '⚠️ Moisture near threshold'
+                    : data.moisture < p.moisture.min ? '🚨 Low moisture – Water needed!' : '🌊 Waterlogged – Check drainage';
+            document.getElementById('moistureIdeal').textContent = `${p.moisture.min}–${p.moisture.max}%`;
+
+            // pH
+            document.getElementById('phVal').textContent = data.ph.toFixed(1);
+            const phPct = ((data.ph - 3) / 7) * 100;
+            document.getElementById('phMarker').style.left = Math.min(95, Math.max(5, phPct)) + '%';
+            const phCat = SD.phCategory(data.ph);
+            const phZ = document.getElementById('phZone');
+            phZ.textContent = phCat.label;
+            phZ.style.color = phCat.cls === 'text-red' ? 'var(--red-400)' : phCat.cls === 'text-amber' ? 'var(--amber-400)' : 'var(--green-300)';
+            document.getElementById('phIdeal').textContent = `${p.ph.min}–${p.ph.max}`;
+
+            // NPK
+            ['n', 'p', 'k'].forEach(k => {
+                const v = data[k];
+                document.getElementById(k + 'Val').textContent = v.toFixed(0);
+                const lvl = SD.npkLevel(v);
+                document.getElementById(k + 'Badge').innerHTML = `<span class="badge ${lvl.cls}">${lvl.label}</span>`;
+            });
+
+            // Temp / Humidity
+            document.getElementById('tempVal').textContent = data.temperature.toFixed(1);
+            document.getElementById('humVal').textContent = data.humidity.toFixed(0);
+            document.getElementById('tempIdeal').textContent = `${p.temp.min}–${p.temp.max}°C`;
+
+            // Pump
+            const pumpOn = manualPump !== null ? manualPump : data.pumpOn;
+            updatePumpUI(pumpOn, data.lastWatered, data.lastWaterDuration);
+
+            // Health Summary
+            const alerts = SD.getAlerts(data, crop);
+            const critCount = alerts.filter(a => a.type === 'critical').length;
+            const warnCount = alerts.filter(a => a.type === 'warning').length;
+            const emoji = critCount > 0 ? '🚨' : warnCount > 1 ? '⚠️' : warnCount > 0 ? '🟡' : '✅';
+            const label = critCount > 0 ? 'Critical Issues Detected' : warnCount > 1 ? 'Multiple Warnings' : warnCount > 0 ? 'Minor Attention Needed' : 'Soil Condition Healthy';
+            const sub = critCount > 0 ? `${critCount} critical + ${warnCount} warnings` : warnCount > 0 ? `${warnCount} item(s) need attention` : 'All parameters within ideal range';
+            document.getElementById('healthEmoji').textContent = emoji;
+            document.getElementById('healthLabel').textContent = label;
+            document.getElementById('healthSub').textContent = sub;
+
+            // Alerts
+            renderAlerts(alerts);
+
+            // Last updated
+            document.getElementById('lastReadingTime').textContent = new Date().toLocaleTimeString();
+            document.getElementById('lastUpdatedTime').textContent = 'Updated ' + new Date().toLocaleTimeString();
+        }
+
+        /* ── Start ─────────────────────────────────────────────────── */
+        SD.onLiveData(updateDashboard);
+        SD.startLiveData(5000);
+    </script>
+</body>
+
+</html>

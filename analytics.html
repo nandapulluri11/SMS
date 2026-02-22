@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics – SoilSense</title>
+    <meta name="description"
+        content="Historical soil sensor data analytics and graphs — moisture, pH, NPK trends over time." />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/analytics.css" />
+    <link rel="stylesheet" href="styles/chatbot.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="brand-icon">🌱</div>
+            Soil<span>Sense</span>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"
+            aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">🏠 Home</a></li>
+            <li><a href="dashboard.html">📊 Dashboard</a></li>
+            <li><a href="analytics.html" class="active">📈 Analytics</a></li>
+            <li><a href="recommendations.html">🧠 Recommendations</a></li>
+            <li><a href="about.html">ℹ️ About</a></li>
+        </ul>
+        <div class="nav-user">
+            <div class="nav-user-badge" id="navUserBadge" style="display:none">
+                👨‍🌾 <span id="navUserName">Farmer</span>
+            </div>
+            <button class="btn-login-nav" id="navLoginBtn" onclick="location.href='login.html'">Login</button>
+            <button class="btn-logout" id="navLogoutBtn" style="display:none" onclick="doLogout()">Logout</button>
+        </div>
+    </nav>
+
+    <main class="page-wrapper">
+        <div class="container">
+            <div class="page-title-bar fade-up">
+                <div class="label">📈 Historical Data</div>
+                <h1>Soil Analytics</h1>
+                <p>View trends and patterns from past sensor readings to make informed farming decisions</p>
+            </div>
+
+            <!-- Controls -->
+            <div class="analytics-controls fade-up">
+                <div class="tab-group">
+                    <button class="tab-btn active" id="tabDaily" onclick="setRange('daily')">Daily</button>
+                    <button class="tab-btn" id="tabWeekly" onclick="setRange('weekly')">Weekly</button>
+                    <button class="tab-btn" id="tabMonthly" onclick="setRange('monthly')">Monthly</button>
+                </div>
+                <div class="analytics-meta" id="analyticsMeta">Loading data...</div>
+                <button class="btn btn-secondary" onclick="refreshCharts()"
+                    style="padding:.5rem 1.1rem; font-size:.88rem">🔄 Refresh</button>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="charts-grid">
+
+                <!-- Moisture Chart -->
+                <div class="chart-card fade-up">
+                    <div class="chart-card-header">
+                        <div>
+                            <h4>💧 Soil Moisture</h4>
+                            <p>Moisture % over time</p>
+                        </div>
+                        <span class="badge badge-blue" id="moistureAvgBadge">Avg: --</span>
+                    </div>
+                    <div class="chart-wrap"><canvas id="moistureChart"></canvas></div>
+                </div>
+
+                <!-- pH Chart -->
+                <div class="chart-card fade-up fade-up-d1">
+                    <div class="chart-card-header">
+                        <div>
+                            <h4>🧪 Soil pH</h4>
+                            <p>pH level over time</p>
+                        </div>
+                        <span class="badge badge-amber" id="phAvgBadge">Avg: --</span>
+                    </div>
+                    <div class="chart-wrap"><canvas id="phChart"></canvas></div>
+                </div>
+
+                <!-- NPK Chart (wide) -->
+                <div class="chart-card wide fade-up fade-up-d2">
+                    <div class="chart-card-header">
+                        <div>
+                            <h4>🌿 NPK Nutrient Trends</h4>
+                            <p>Nitrogen, Phosphorus, and Potassium levels over time</p>
+                        </div>
+                        <div style="display:flex;gap:.5rem">
+                            <span class="badge badge-green">N</span>
+                            <span class="badge badge-amber">P</span>
+                            <span class="badge badge-blue">K</span>
+                        </div>
+                    </div>
+                    <div class="chart-wrap"><canvas id="npkChart"></canvas></div>
+                </div>
+
+                <!-- Temp & Humidity Chart -->
+                <div class="chart-card fade-up fade-up-d3">
+                    <div class="chart-card-header">
+                        <div>
+                            <h4>🌡️ Temperature</h4>
+                            <p>°C over time</p>
+                        </div>
+                        <span class="badge badge-red" id="tempAvgBadge">Avg: --</span>
+                    </div>
+                    <div class="chart-wrap"><canvas id="tempChart"></canvas></div>
+                </div>
+
+                <!-- Humidity Chart -->
+                <div class="chart-card fade-up fade-up-d3">
+                    <div class="chart-card-header">
+                        <div>
+                            <h4>💦 Humidity</h4>
+                            <p>Relative humidity % over time</p>
+                        </div>
+                        <span class="badge badge-blue" id="humAvgBadge">Avg: --</span>
+                    </div>
+                    <div class="chart-wrap"><canvas id="humChart"></canvas></div>
+                </div>
+
+            </div><!-- /charts-grid -->
+
+            <!-- Summary Table -->
+            <div class="chart-card fade-up" style="margin-top:0">
+                <h4 style="margin-bottom:1.25rem">📋 Statistical Summary</h4>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Minimum</th>
+                            <th>Maximum</th>
+                            <th>Average</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem">Loading
+                                data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>🌱 <strong>SoilSense</strong> – ESP32 Smart Soil Monitoring System · <a
+                    href="dashboard.html">Dashboard</a> · <a href="recommendations.html">Recommendations</a></p>
+        </div>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script>
+        /* ── Auth ──────────────────────────────────────────────────── */
+        const userRaw = localStorage.getItem('soil_user');
+        if (userRaw) {
+            const u = JSON.parse(userRaw);
+            document.getElementById('navUserBadge').style.display = 'flex';
+            document.getElementById('navUserName').textContent = u.name;
+            document.getElementById('navLoginBtn').style.display = 'none';
+            document.getElementById('navLogoutBtn').style.display = 'inline-block';
+        }
+        function doLogout() { localStorage.removeItem('soil_user'); location.reload(); }
+
+        /* ── Chart.js defaults ─────────────────────────────────────── */
+        Chart.defaults.color = '#9ecfaa';
+        Chart.defaults.borderColor = 'rgba(56,163,82,.1)';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.font.size = 11;
+
+        const CHART_OPTS = (label, color, min, max) => ({
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(10,25,14,.95)',
+                    borderColor: 'rgba(56,163,82,.3)',
+                    borderWidth: 1,
+                    titleColor: '#9ecfaa',
+                    bodyColor: '#e8f5ea',
+                    padding: 10,
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(56,163,82,.07)' },
+                    ticks: { maxTicksLimit: 8, color: '#5a8c65' },
+                },
+                y: {
+                    min, max,
+                    grid: { color: 'rgba(56,163,82,.07)' },
+                    ticks: { color: '#5a8c65' },
+                }
+            },
+            elements: { point: { radius: 2, hoverRadius: 5 }, line: { tension: 0.4, borderWidth: 2 } }
+        });
+
+        let charts = {};
+        let currentRange = 'daily';
+
+        function makeGradient(ctx, color) {
+            const g = ctx.createLinearGradient(0, 0, 0, 200);
+            g.addColorStop(0, color + '55');
+            g.addColorStop(1, color + '05');
+            return g;
+        }
+
+        function buildDataset(history, field) {
+            return history.map(r => ({ x: new Date(r.timestamp).toLocaleTimeString(), y: +r[field]?.toFixed(2) }));
+        }
+
+        function avg(arr) { return arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : '--'; }
+        function mn(arr) { return arr.length ? Math.min(...arr).toFixed(1) : '--'; }
+        function mx(arr) { return arr.length ? Math.max(...arr).toFixed(1) : '--'; }
+
+        function initCharts() {
+            function mkChart(id, label, color, minY, maxY) {
+                const ctx = document.getElementById(id).getContext('2d');
+                return new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label,
+                            data: [],
+                            borderColor: color,
+                            backgroundColor: makeGradient(ctx, color),
+                            fill: true,
+                        }]
+                    },
+                    options: CHART_OPTS(label, color, minY, maxY)
+                });
+            }
+
+            charts.moisture = mkChart('moistureChart', 'Soil Moisture (%)', '#3b82f6', 0, 100);
+            charts.ph = mkChart('phChart', 'pH Level', '#f59e0b', 3, 10);
+            charts.temp = mkChart('tempChart', 'Temperature (°C)', '#ef4444', 5, 50);
+            charts.hum = mkChart('humChart', 'Humidity (%)', '#60a5fa', 10, 100);
+
+            // NPK multi-line
+            const npkCtx = document.getElementById('npkChart').getContext('2d');
+            charts.npk = new Chart(npkCtx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        { label: 'Nitrogen (N)', data: [], borderColor: '#5ec97a', backgroundColor: 'transparent', borderWidth: 2 },
+                        { label: 'Phosphorus (P)', data: [], borderColor: '#f59e0b', backgroundColor: 'transparent', borderWidth: 2 },
+                        { label: 'Potassium (K)', data: [], borderColor: '#60a5fa', backgroundColor: 'transparent', borderWidth: 2 },
+                    ]
+                },
+                options: {
+                    ...CHART_OPTS('NPK', '#5ec97a', 0, 100),
+                    plugins: {
+                        ...CHART_OPTS('NPK').plugins,
+                        legend: {
+                            display: true,
+                            labels: { color: '#9ecfaa', boxWidth: 12, font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function refreshCharts() {
+            const history = window.SoilData.getFilteredHistory(currentRange);
+            const meta = document.getElementById('analyticsMeta');
+            meta.textContent = `${history.length} readings · ${currentRange.charAt(0).toUpperCase() + currentRange.slice(1)} view`;
+
+            if (!history.length) { meta.textContent = 'No data for selected range'; return; }
+
+            const labels = history.map(r => {
+                const d = new Date(r.timestamp);
+                return currentRange === 'daily' ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : currentRange === 'weekly' ? d.toLocaleDateString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' })
+                        : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+            });
+
+            function setData(chart, data) {
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = data;
+                chart.update('active');
+            }
+
+            const M = history.map(r => r.moisture), pH = history.map(r => r.ph),
+                T = history.map(r => r.temperature), H = history.map(r => r.humidity),
+                N = history.map(r => r.n), P = history.map(r => r.p), K = history.map(r => r.k);
+
+            setData(charts.moisture, M);
+            setData(charts.ph, pH);
+            setData(charts.temp, T);
+            setData(charts.hum, H);
+
+            charts.npk.data.labels = labels;
+            charts.npk.data.datasets[0].data = N;
+            charts.npk.data.datasets[1].data = P;
+            charts.npk.data.datasets[2].data = K;
+            charts.npk.update('active');
+
+            // Avg badges
+            document.getElementById('moistureAvgBadge').textContent = `Avg: ${avg(M)}%`;
+            document.getElementById('phAvgBadge').textContent = `Avg: ${avg(pH)}`;
+            document.getElementById('tempAvgBadge').textContent = `Avg: ${avg(T)}°C`;
+            document.getElementById('humAvgBadge').textContent = `Avg: ${avg(H)}%`;
+
+            // Stats table
+            const SD = window.SoilData;
+            const crop = SD.getCurrentCrop();
+            const p = SD.CROP_PROFILES[crop];
+            const rows = [
+                { name: '💧 Moisture', field: 'moisture', vals: M, unit: '%', ideal: `${p.moisture.min}–${p.moisture.max}` },
+                { name: '🧪 pH', field: 'ph', vals: pH, unit: '', ideal: `${p.ph.min}–${p.ph.max}` },
+                { name: '🌿 Nitrogen', field: 'n', vals: N, unit: 'mg/kg', ideal: `${p.n.min}–${p.n.max}` },
+                { name: '🌻 Phosphorus', field: 'p', vals: P, unit: 'mg/kg', ideal: `${p.p.min}–${p.p.max}` },
+                { name: '🍃 Potassium', field: 'k', vals: K, unit: 'mg/kg', ideal: `${p.k.min}–${p.k.max}` },
+                { name: '🌡️ Temperature', field: 'temperature', vals: T, unit: '°C', ideal: `${p.temp.min}–${p.temp.max}` },
+                { name: '💦 Humidity', field: 'humidity', vals: H, unit: '%', ideal: `${p.humidity.min}–${p.humidity.max}` },
+            ];
+            const tbody = document.getElementById('statsTableBody');
+            tbody.innerHTML = rows.map(r => {
+                const a = +avg(r.vals);
+                const [lo, hi] = r.ideal.split('–').map(Number);
+                const ok = a >= lo && a <= hi;
+                return `<tr>
+      <td>${r.name}</td>
+      <td>${mn(r.vals)}${r.unit}</td>
+      <td>${mx(r.vals)}${r.unit}</td>
+      <td><strong>${avg(r.vals)}${r.unit}</strong></td>
+      <td><span class="badge ${ok ? 'badge-green' : 'badge-amber'}">${ok ? '✅ Ideal' : '⚠️ Check'}</span></td>
+    </tr>`;
+            }).join('');
+        }
+
+        function setRange(range) {
+            currentRange = range;
+            ['daily', 'weekly', 'monthly'].forEach(r => {
+                document.getElementById('tab' + r.charAt(0).toUpperCase() + r.slice(1)).classList.toggle('active', r === range);
+            });
+            refreshCharts();
+        }
+
+        // Init
+        initCharts();
+        refreshCharts();
+
+        // Auto-refresh every 10s with new live data
+        window.SoilData.onLiveData(() => refreshCharts());
+        window.SoilData.startLiveData(10000);
+    </script>
+</body>
+
+</html>

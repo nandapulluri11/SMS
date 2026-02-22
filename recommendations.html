@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recommendations – SoilSense</title>
+    <meta name="description"
+        content="AI-powered soil health recommendations for irrigation, fertilization, and crop management." />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/chatbot.css" />
+    <style>
+        .rec-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .rec-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .rec-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            backdrop-filter: blur(14px);
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .rec-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-card), var(--shadow-glow);
+        }
+
+        .rec-card.critical {
+            border-left-color: var(--red-400);
+            background: rgba(239, 68, 68, .04);
+        }
+
+        .rec-card.warning {
+            border-left-color: var(--amber-400);
+            background: rgba(245, 158, 11, .04);
+        }
+
+        .rec-card.healthy {
+            border-left-color: var(--green-400);
+            background: rgba(56, 163, 82, .04);
+        }
+
+        .rec-card-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .rec-emoji {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+
+        .rec-card.critical .rec-emoji {
+            background: rgba(239, 68, 68, .12);
+            border: 1px solid rgba(239, 68, 68, .25);
+        }
+
+        .rec-card.warning .rec-emoji {
+            background: rgba(245, 158, 11, .12);
+            border: 1px solid rgba(245, 158, 11, .25);
+        }
+
+        .rec-card.healthy .rec-emoji {
+            background: rgba(56, 163, 82, .12);
+            border: 1px solid rgba(56, 163, 82, .25);
+        }
+
+        .rec-category {
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            margin-bottom: .2rem;
+        }
+
+        .rec-card.critical .rec-category {
+            color: var(--red-400);
+        }
+
+        .rec-card.warning .rec-category {
+            color: var(--amber-400);
+        }
+
+        .rec-card.healthy .rec-category {
+            color: var(--green-300);
+        }
+
+        .rec-message {
+            font-size: .92rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .rec-param-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: .9rem;
+            padding-top: .75rem;
+            border-top: 1px solid var(--border-color);
+            font-size: .8rem;
+        }
+
+        .rec-param-row span:first-child {
+            color: var(--text-muted);
+        }
+
+        .rec-overview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .ov-card {
+            text-align: center;
+            padding: 1.25rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+        }
+
+        .ov-number {
+            font-family: var(--font-head);
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .ov-label {
+            font-size: .78rem;
+            color: var(--text-muted);
+            margin-top: .2rem;
+        }
+
+        .action-steps {
+            margin-top: 2rem;
+        }
+
+        .step-list {
+            display: flex;
+            flex-direction: column;
+            gap: .75rem;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            transition: all var(--transition);
+        }
+
+        .step-item:hover {
+            border-color: rgba(56, 163, 82, .3);
+        }
+
+        .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(56, 163, 82, .15);
+            border: 1px solid rgba(56, 163, 82, .3);
+            color: var(--green-300);
+            font-weight: 700;
+            font-size: .88rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-content h5 {
+            font-size: .9rem;
+            color: var(--text-primary);
+            margin-bottom: .2rem;
+        }
+
+        .step-content p {
+            font-size: .82rem;
+            color: var(--text-muted);
+        }
+
+        @media(max-width:768px) {
+            .rec-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .rec-overview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media(max-width:480px) {
+            .rec-overview {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="brand-icon">🌱</div>
+            Soil<span>Sense</span>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"
+            aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">🏠 Home</a></li>
+            <li><a href="dashboard.html">📊 Dashboard</a></li>
+            <li><a href="analytics.html">📈 Analytics</a></li>
+            <li><a href="recommendations.html" class="active">🧠 Recommendations</a></li>
+            <li><a href="about.html">ℹ️ About</a></li>
+        </ul>
+        <div class="nav-user">
+            <div class="nav-user-badge" id="navUserBadge" style="display:none">
+                👨‍🌾 <span id="navUserName">Farmer</span>
+            </div>
+            <button class="btn-login-nav" id="navLoginBtn" onclick="location.href='login.html'">Login</button>
+            <button class="btn-logout" id="navLogoutBtn" style="display:none" onclick="doLogout()">Logout</button>
+        </div>
+    </nav>
+
+    <main class="page-wrapper">
+        <div class="container">
+            <div class="page-title-bar fade-up">
+                <div class="label">🤖 AI Analysis Engine</div>
+                <h1>Smart Recommendations</h1>
+                <p id="recSubtitle">Analyzing latest sensor readings for <span id="recCropName">your crop</span>...</p>
+            </div>
+
+            <!-- Overview Stats -->
+            <div class="rec-overview fade-up" id="recOverview">
+                <div class="ov-card">
+                    <div class="ov-number" id="ovCritical" style="color:var(--red-400)">-</div>
+                    <div class="ov-label">Critical Issues</div>
+                </div>
+                <div class="ov-card">
+                    <div class="ov-number" id="ovWarning" style="color:var(--amber-400)">-</div>
+                    <div class="ov-label">Warnings</div>
+                </div>
+                <div class="ov-card">
+                    <div class="ov-number" id="ovHealthy" style="color:var(--green-300)">-</div>
+                    <div class="ov-label">Healthy Params</div>
+                </div>
+                <div class="ov-card">
+                    <div class="ov-number" id="ovTotal" style="color:var(--text-primary)">-</div>
+                    <div class="ov-label">Total Checks</div>
+                </div>
+            </div>
+
+            <div class="rec-controls fade-up">
+                <h3 id="recPageTitle">Loading...</h3>
+                <button class="btn btn-secondary" onclick="refresh()" style="padding:.5rem 1.1rem;font-size:.88rem">🔄
+                    Refresh Analysis</button>
+            </div>
+
+            <!-- Recommendation Cards -->
+            <div class="rec-grid" id="recGrid"></div>
+
+            <!-- Priority Actions -->
+            <div class="action-steps card fade-up">
+                <h3 style="margin-bottom:1.25rem">📋 Priority Action Plan</h3>
+                <div class="step-list" id="actionList"></div>
+            </div>
+
+            <!-- Notification Info -->
+            <div class="card fade-up"
+                style="margin-top:1.5rem;background:rgba(59,130,246,.06);border-color:rgba(59,130,246,.2)">
+                <h4 style="color:var(--blue-400);margin-bottom:.75rem">📱 Notification System</h4>
+                <p style="font-size:.9rem;line-height:1.7">
+                    In a deployed system, critical alerts are automatically sent via:
+                    <strong style="color:var(--text-primary)">SMS</strong> (using Twilio API),
+                    <strong style="color:var(--text-primary)">Email</strong> (using SMTP/SendGrid),
+                    and <strong style="color:var(--text-primary)">WhatsApp</strong> (using WhatsApp Business API).
+                    Farmers receive instant push notifications when soil moisture drops below threshold or pH goes out
+                    of range.
+                </p>
+                <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem">
+                    <div class="badge badge-blue">📲 SMS Alerts</div>
+                    <div class="badge badge-green">📧 Email Notifications</div>
+                    <div class="badge badge-amber">💬 WhatsApp Bot</div>
+                    <div class="badge badge-blue">🔔 Push Notifications</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>🌱 <strong>SoilSense</strong> – Recommendations update with every sensor reading · <a
+                    href="dashboard.html">Dashboard</a></p>
+        </div>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script>
+        const userRaw = localStorage.getItem('soil_user');
+        if (userRaw) {
+            const u = JSON.parse(userRaw);
+            document.getElementById('navUserBadge').style.display = 'flex';
+            document.getElementById('navUserName').textContent = u.name;
+            document.getElementById('navLoginBtn').style.display = 'none';
+            document.getElementById('navLogoutBtn').style.display = 'inline-block';
+        }
+        function doLogout() { localStorage.removeItem('soil_user'); location.reload(); }
+
+        const SD = window.SoilData;
+        let lastData = null;
+
+        function refresh() {
+            const history = SD.getHistory();
+            const data = history.length ? history[history.length - 1] : SD.getReading();
+            lastData = data;
+            const crop = SD.getCurrentCrop();
+            const p = SD.CROP_PROFILES[crop];
+            const recs = SD.getRecommendations(data, crop);
+
+            document.getElementById('recCropName').textContent = p.name + ' ' + p.icon;
+            document.getElementById('recSubtitle').innerHTML =
+                `Latest analysis for <strong style="color:var(--green-300)">${p.name} ${p.icon}</strong> — ${new Date(data.timestamp || Date.now()).toLocaleString()}`;
+            document.getElementById('recPageTitle').textContent =
+                `${recs.length} Recommendations · ${p.name} Profile`;
+
+            // Counts
+            const crit = recs.filter(r => r.type === 'critical').length;
+            const warn = recs.filter(r => r.type === 'warning').length;
+            const hlth = recs.filter(r => r.type === 'healthy').length;
+            document.getElementById('ovCritical').textContent = crit;
+            document.getElementById('ovWarning').textContent = warn;
+            document.getElementById('ovHealthy').textContent = hlth;
+            document.getElementById('ovTotal').textContent = recs.length;
+
+            // Cards
+            const grid = document.getElementById('recGrid');
+            grid.innerHTML = '';
+            recs.forEach(rec => {
+                const card = document.createElement('div');
+                card.className = `rec-card ${rec.type} fade-up`;
+                const severity = rec.type === 'critical' ? `<span class="badge badge-red">🚨 Critical</span>`
+                    : rec.type === 'warning' ? `<span class="badge badge-amber">⚠️ Warning</span>`
+                        : `<span class="badge badge-green">✅ Healthy</span>`;
+                card.innerHTML = `
+      <div class="rec-card-top">
+        <div class="rec-emoji">${rec.icon}</div>
+        <div>
+          <div class="rec-category">${rec.category}</div>
+          <div class="rec-message">${rec.message}</div>
+        </div>
+      </div>
+      <div class="rec-param-row">
+        <span>Parameter: <strong style="color:var(--text-secondary)">${rec.param}</strong></span>
+        ${severity}
+      </div>`;
+                grid.appendChild(card);
+            });
+
+            // Action Plan
+            const actions = recs.filter(r => r.type !== 'healthy');
+            const list = document.getElementById('actionList');
+            if (actions.length === 0) {
+                list.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--green-300);font-weight:600">
+      🌟 All soil parameters are healthy!<br><span style="color:var(--text-muted);font-weight:400;font-size:.88rem">No immediate actions required. Continue regular monitoring.</span>
+    </div>`;
+            } else {
+                list.innerHTML = actions.map((a, i) => `
+      <div class="step-item">
+        <div class="step-num" style="${a.type === 'critical' ? 'color:var(--red-400);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.12)' : ''}">${i + 1}</div>
+        <div class="step-content">
+          <h5>${a.icon} ${a.category}</h5>
+          <p>${a.message}</p>
+        </div>
+      </div>`).join('');
+            }
+        }
+
+        refresh();
+        SD.onLiveData(() => refresh());
+        SD.startLiveData(8000);
+    </script>
+</body>
+
+</html>

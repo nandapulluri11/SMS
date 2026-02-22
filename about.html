@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About – SoilSense | ESP32 Smart Soil Monitoring System</title>
+    <meta name="description"
+        content="Learn about the SoilSense ESP32 soil monitoring project — hardware, software, data flow, and science expo explanation." />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/chatbot.css" />
+    <style>
+        .about-hero {
+            text-align: center;
+            padding: 4rem 0 3rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .about-hero p {
+            max-width: 680px;
+            margin: 1rem auto 0;
+            font-size: 1.08rem;
+            line-height: 1.75;
+        }
+
+        /* Hardware Section */
+        .hw-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 2.5rem;
+        }
+
+        .hw-card {
+            padding: 1.5rem 1.25rem;
+            text-align: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition);
+        }
+
+        .hw-card:hover {
+            border-color: rgba(56, 163, 82, .3);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .hw-icon {
+            font-size: 2rem;
+            margin-bottom: .75rem;
+        }
+
+        .hw-card h4 {
+            font-size: .95rem;
+            margin-bottom: .4rem;
+        }
+
+        .hw-card p {
+            font-size: .8rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        .hw-card .badge {
+            margin-top: .75rem;
+        }
+
+        /* Data Flow */
+        .flow-detailed {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin-top: 2rem;
+        }
+
+        .flow-item {
+            display: grid;
+            grid-template-columns: 48px 1fr;
+            gap: 1.25rem;
+            align-items: flex-start;
+        }
+
+        .flow-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .flow-dot {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--green-500);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 0 16px rgba(56, 163, 82, .2);
+            flex-shrink: 0;
+        }
+
+        .flow-line {
+            width: 2px;
+            flex: 1;
+            min-height: 36px;
+            background: linear-gradient(180deg, var(--green-600), transparent);
+            margin: 0 auto;
+        }
+
+        .flow-body {
+            padding-bottom: 2rem;
+        }
+
+        .flow-body h4 {
+            color: var(--text-primary);
+            margin-bottom: .35rem;
+        }
+
+        .flow-body p {
+            font-size: .88rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+        }
+
+        .flow-body .badge {
+            margin-top: .6rem;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: rgba(0, 0, 0, .35);
+            border: 1px solid rgba(56, 163, 82, .18);
+            border-radius: var(--radius-md);
+            padding: 1.25rem 1.5rem;
+            font-family: monospace;
+            font-size: .85rem;
+            color: var(--green-200);
+            overflow-x: auto;
+            line-height: 1.7;
+        }
+
+        .code-comment {
+            color: var(--text-muted);
+        }
+
+        /* Expo section */
+        .expo-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .expo-point {
+            padding: 1.25rem 1.5rem;
+            background: rgba(56, 163, 82, .05);
+            border: 1px solid rgba(56, 163, 82, .15);
+            border-radius: var(--radius-md);
+        }
+
+        .expo-point h5 {
+            color: var(--green-300);
+            margin-bottom: .4rem;
+            font-size: .95rem;
+        }
+
+        .expo-point p {
+            font-size: .83rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Team */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .team-card {
+            text-align: center;
+            padding: 1.75rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition);
+        }
+
+        .team-card:hover {
+            border-color: rgba(56, 163, 82, .3);
+            transform: translateY(-3px);
+        }
+
+        .team-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green-600), var(--green-400));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1rem;
+            box-shadow: 0 0 20px rgba(56, 163, 82, .25);
+        }
+
+        .team-card h5 {
+            font-size: .95rem;
+        }
+
+        .team-card p {
+            font-size: .78rem;
+            color: var(--text-muted);
+            margin-top: .2rem;
+        }
+
+        section.about-section {
+            padding: 4rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        section.about-section:last-of-type {
+            border-bottom: none;
+        }
+
+        @media(max-width:600px) {
+            .expo-points {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="brand-icon">🌱</div>
+            Soil<span>Sense</span>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"
+            aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">🏠 Home</a></li>
+            <li><a href="dashboard.html">📊 Dashboard</a></li>
+            <li><a href="analytics.html">📈 Analytics</a></li>
+            <li><a href="recommendations.html">🧠 Recommendations</a></li>
+            <li><a href="about.html" class="active">ℹ️ About</a></li>
+        </ul>
+        <div class="nav-user">
+            <button class="btn-login-nav" onclick="location.href='login.html'">Login</button>
+        </div>
+    </nav>
+
+    <main class="page-wrapper">
+        <div class="container">
+
+            <!-- Hero -->
+            <div class="about-hero fade-up">
+                <div class="section-label">Science Expo 2026</div>
+                <h1>ESP32 Smart Soil<br />Monitoring System</h1>
+                <p>
+                    A low-cost, IoT-based precision agriculture system that monitors soil health
+                    in real-time using an ESP32 microcontroller and multiple sensors, delivering
+                    live data to a web dashboard for smart irrigation and fertilization decisions.
+                </p>
+                <div style="display:flex;justify-content:center;gap:1rem;margin-top:2rem;flex-wrap:wrap">
+                    <span class="badge badge-green">🌱 Smart Agriculture</span>
+                    <span class="badge badge-blue">📡 IoT System</span>
+                    <span class="badge badge-amber">🤖 AI Recommendations</span>
+                    <span class="badge badge-green">📱 Responsive Web App</span>
+                </div>
+            </div>
+
+            <!-- Hardware Components -->
+            <section class="about-section">
+                <div class="section-header">
+                    <div class="section-label">Hardware</div>
+                    <h2 class="section-title">Components Used</h2>
+                    <p class="section-subtitle">All components are affordable and available at local electronics stores
+                    </p>
+                </div>
+                <div class="hw-grid">
+                    <div class="hw-card fade-up">
+                        <div class="hw-icon">🔌</div>
+                        <h4>ESP32 Microcontroller</h4>
+                        <p>Dual-core 240MHz processor with built-in Wi-Fi & Bluetooth. Acts as the brain of the system.
+                        </p>
+                        <div class="badge badge-green">Main Controller</div>
+                    </div>
+                    <div class="hw-card fade-up fade-up-d1">
+                        <div class="hw-icon">💧</div>
+                        <h4>Soil Moisture Sensor</h4>
+                        <p>Capacitive/resistive sensor detects water content in soil. Outputs 0–100% moisture value.</p>
+                        <div class="badge badge-blue">Analog Sensor</div>
+                    </div>
+                    <div class="hw-card fade-up fade-up-d2">
+                        <div class="hw-icon">🧪</div>
+                        <h4>pH Sensor Module</h4>
+                        <p>BNC-type pH electrode measures soil acidity from 0–14 pH via analog voltage output.</p>
+                        <div class="badge badge-amber">Analog Sensor</div>
+                    </div>
+                    <div class="hw-card fade-up fade-up-d3">
+                        <div class="hw-icon">🌿</div>
+                        <h4>NPK Sensor (RS485)</h4>
+                        <p>Reads Nitrogen, Phosphorus, and Potassium levels from soil via Modbus RS485 protocol.</p>
+                        <div class="badge badge-green">Digital Sensor</div>
+                    </div>
+                    <div class="hw-card fade-up">
+                        <div class="hw-icon">🌡️</div>
+                        <h4>DHT22 Sensor</h4>
+                        <p>Temperature and humidity sensor with ±0.5°C accuracy. Single-wire digital communication.</p>
+                        <div class="badge badge-blue">Digital Sensor</div>
+                    </div>
+                    <div class="hw-card fade-up fade-up-d1">
+                        <div class="hw-icon">⚙️</div>
+                        <h4>Relay Module</h4>
+                        <p>5V relay controls the 12V water pump for auto-irrigation. Triggered by ESP32 GPIO pin.</p>
+                        <div class="badge badge-amber">Actuator</div>
+                    </div>
+                    <div class="hw-card fade-up fade-up-d2">
+                        <div class="hw-icon">💦</div>
+                        <h4>Water Pump (12V DC)</h4>
+                        <p>Submersible pump delivers water to the field. Controlled by relay for auto-irrigation.</p>
+                        <div class="badge badge-blue">Actuator</div>
+                    </div>
+                    <div class="hw-card fade-up fade-up-d3">
+                        <div class="hw-icon">🔋</div>
+                        <h4>Power Supply</h4>
+                        <p>5V USB adapter or solar panel with battery backup for continuous field operation.</p>
+                        <div class="badge badge-green">Power</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Flow -->
+            <section class="about-section">
+                <div class="section-header">
+                    <div class="section-label">System Architecture</div>
+                    <h2 class="section-title">How The Data Flows</h2>
+                    <p class="section-subtitle">Step-by-step explanation suitable for students and expo judges</p>
+                </div>
+                <div class="flow-detailed">
+                    <div class="flow-item">
+                        <div class="flow-node">
+                            <div class="flow-dot">🌍</div>
+                            <div class="flow-line"></div>
+                        </div>
+                        <div class="flow-body">
+                            <h4>Step 1: Sensors Measure the Soil</h4>
+                            <p>Five types of sensors are inserted into the farm soil. The moisture sensor checks how wet
+                                the soil is,
+                                the pH sensor measures acidity, the NPK sensor checks nutrient levels (like fertilizer),
+                                and the DHT22
+                                sensor reads air temperature and humidity near the field.</p>
+                            <span class="badge badge-green">Every 5 seconds</span>
+                        </div>
+                    </div>
+                    <div class="flow-item">
+                        <div class="flow-node">
+                            <div class="flow-dot">🔌</div>
+                            <div class="flow-line"></div>
+                        </div>
+                        <div class="flow-body">
+                            <h4>Step 2: ESP32 Reads & Packages Data</h4>
+                            <p>The ESP32 microcontroller reads all sensor signals — both analog (moisture, pH) and
+                                digital (NPK via RS485,
+                                DHT22). It converts raw voltage values into meaningful numbers and packages them into a
+                                JSON format
+                                like: <code
+                                    style="color:var(--green-300);background:rgba(56,163,82,.1);padding:.1rem .4rem;border-radius:4px">{"moisture":72,"ph":6.8,"n":55,"p":38,"k":45}</code>.
+                            </p>
+                            <span class="badge badge-blue">ESP32 Processing</span>
+                        </div>
+                    </div>
+                    <div class="flow-item">
+                        <div class="flow-node">
+                            <div class="flow-dot">📡</div>
+                            <div class="flow-line"></div>
+                        </div>
+                        <div class="flow-body">
+                            <h4>Step 3: Wi-Fi Transmission</h4>
+                            <p>The ESP32 connects to your farm's Wi-Fi network and sends the JSON data to a cloud server
+                                using
+                                HTTP POST request or MQTT protocol. This happens wirelessly — no wires needed between
+                                the field and the internet!</p>
+                            <div class="code-block" style="margin-top:.75rem"><span class="code-comment">// ESP32
+                                    Arduino Code (simplified)</span>
+                                WiFi.begin("FarmNetwork", "password");
+                                HTTPClient http;
+                                http.begin("https://api.soilsense.io/data");
+                                http.POST(jsonPayload); <span class="code-comment">// Send to cloud</span></div>
+                            <span class="badge badge-amber">Wi-Fi / MQTT</span>
+                        </div>
+                    </div>
+                    <div class="flow-item">
+                        <div class="flow-node">
+                            <div class="flow-dot">☁️</div>
+                            <div class="flow-line"></div>
+                        </div>
+                        <div class="flow-body">
+                            <h4>Step 4: Cloud Storage & Processing</h4>
+                            <p>The cloud server (Node.js + MongoDB or Firebase) receives the reading, stamps it with a
+                                timestamp,
+                                and stores it in a database. It also runs server-side alert checks — if moisture drops
+                                critically,
+                                it triggers an SMS/email notification immediately.</p>
+                            <span class="badge badge-green">Database: MongoDB / Firebase</span>
+                        </div>
+                    </div>
+                    <div class="flow-item">
+                        <div class="flow-node">
+                            <div class="flow-dot">🌐</div>
+                            <div class="flow-line"></div>
+                        </div>
+                        <div class="flow-body">
+                            <h4>Step 5: Website Displays Live Data</h4>
+                            <p>The website fetches the latest readings from the cloud API every 5 seconds using
+                                JavaScript.
+                                It renders color-coded sensor cards, pH scales, NPK badges, and Chart.js graphs — all
+                                automatically
+                                updating without refreshing the page.</p>
+                            <span class="badge badge-blue">JavaScript + Chart.js</span>
+                        </div>
+                    </div>
+                    <div class="flow-item">
+                        <div class="flow-node">
+                            <div class="flow-dot">👨‍🌾</div>
+                        </div>
+                        <div class="flow-body">
+                            <h4>Step 6: Farmer Takes Action</h4>
+                            <p>The farmer opens the website on any phone, tablet, or computer. They see instant visual
+                                indicators —
+                                green for healthy, yellow for warning, red for critical. AI recommendations tell them
+                                exactly what to do:
+                                "Water your field", "Add lime", or "All good — no action needed!"</p>
+                            <span class="badge badge-green">✅ Smart Decision Making</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Science Expo -->
+            <section class="about-section">
+                <div class="section-header">
+                    <div class="section-label">Science Expo</div>
+                    <h2 class="section-title">Why This Project Matters</h2>
+                    <p class="section-subtitle">Key impact points for expo judges and evaluators</p>
+                </div>
+                <div class="expo-points">
+                    <div class="expo-point fade-up">
+                        <h5>💰 Low Cost Solution</h5>
+                        <p>Total hardware cost under ₹2,000 ($25). Accessible to small and marginal farmers without
+                            expensive equipment.</p>
+                    </div>
+                    <div class="expo-point fade-up fade-up-d1">
+                        <h5>🌾 Prevents Crop Loss</h5>
+                        <p>Early detection of low moisture or pH imbalance prevents crop diseases and significant yield
+                            losses.</p>
+                    </div>
+                    <div class="expo-point fade-up fade-up-d2">
+                        <h5>💧 Water Conservation</h5>
+                        <p>Auto-irrigation only when needed reduces water usage by up to 40% compared to scheduled
+                            watering.</p>
+                    </div>
+                    <div class="expo-point fade-up fade-up-d3">
+                        <h5>🌱 Soil Health Improvement</h5>
+                        <p>Regular monitoring ensures optimal NPK and pH, leading to healthier soil over time without
+                            over-fertilizing.</p>
+                    </div>
+                    <div class="expo-point fade-up">
+                        <h5>📱 Farmer Friendly</h5>
+                        <p>No technical knowledge needed. Simple color indicators, emoji feedback, and plain-language
+                            advice.</p>
+                    </div>
+                    <div class="expo-point fade-up fade-up-d1">
+                        <h5>🤖 AI-Powered Logic</h5>
+                        <p>Rule-based AI analyzes 7 parameters and generates specific, actionable farm recommendations
+                            automatically.</p>
+                    </div>
+                    <div class="expo-point fade-up fade-up-d2">
+                        <h5>⚡ Real-Time Alerts</h5>
+                        <p>Critical conditions trigger instant on-screen alerts and optional SMS/email notifications via
+                            cloud APIs.</p>
+                    </div>
+                    <div class="expo-point fade-up fade-up-d3">
+                        <h5>📈 Data Analytics</h5>
+                        <p>Historical charts help farmers track seasonal soil trends and plan fertilization schedules
+                            intelligently.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Team -->
+            <section class="about-section fade-up">
+                <div class="section-header">
+                    <div class="section-label">Project Team</div>
+                    <h2 class="section-title">Meet the Builders</h2>
+                </div>
+                <div class="team-grid">
+                    <div class="team-card">
+                        <div class="team-avatar">👨‍💻</div>
+                        <h5>Hardware Engineer</h5>
+                        <p>ESP32 Programming, Sensor Wiring & Circuit Design</p>
+                    </div>
+                    <div class="team-card">
+                        <div class="team-avatar">🎨</div>
+                        <h5>Web Developer</h5>
+                        <p>Dashboard UI, Analytics Charts & Responsive Design</p>
+                    </div>
+                    <div class="team-card">
+                        <div class="team-avatar">🤖</div>
+                        <h5>Software Designer</h5>
+                        <p>AI Rules Engine, Data Flow & Cloud Integration</p>
+                    </div>
+                    <div class="team-card">
+                        <div class="team-avatar">🌾</div>
+                        <h5>Agricultural Advisor</h5>
+                        <p>Crop Threshold Research & Farmer Requirement Analysis</p>
+                    </div>
+                </div>
+                <div class="card"
+                    style="margin-top:2rem;text-align:center;background:rgba(56,163,82,.06);border-color:rgba(56,163,82,.2)">
+                    <h4 style="margin-bottom:.75rem">🏆 Project Category</h4>
+                    <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap">
+                        <span class="badge badge-green">Smart Agriculture</span>
+                        <span class="badge badge-blue">Internet of Things (IoT)</span>
+                        <span class="badge badge-amber">Artificial Intelligence</span>
+                        <span class="badge badge-green">Sustainable Development</span>
+                    </div>
+                    <p style="margin-top:1rem;font-size:.88rem">This project targets <strong
+                            style="color:var(--text-primary)">UN SDG Goal 2: Zero Hunger</strong> and
+                        <strong style="color:var(--text-primary)">SDG Goal 15: Life on Land</strong> by promoting
+                        precision agriculture and sustainable soil management.
+                    </p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>🌱 <strong>SoilSense</strong> – ESP32 Smart Soil Monitoring System for Smart Agriculture &nbsp;|&nbsp;
+                Science Expo 2026 &nbsp;|&nbsp; <a href="index.html">Home</a></p>
+        </div>
+    </footer>
+
+    <script src="js/chatbot.js"></script>
+    <script>
+        const u = localStorage.getItem('soil_user');
+        if (u) {
+            const info = JSON.parse(u);
+            document.querySelector('.nav-user').innerHTML =
+                `<div class="nav-user-badge">👨‍🌾 <span>${info.name}</span></div>
+       <button class="btn-logout" onclick="localStorage.removeItem('soil_user');location.reload()">Logout</button>`;
+        } else {
+            document.querySelector('.nav-user').innerHTML =
+                `<button class="btn-login-nav" onclick="location.href='login.html'">Login</button>`;
+        }
+    </script>
+</body>
+
+</html>

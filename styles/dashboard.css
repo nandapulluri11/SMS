@@ -1,0 +1,465 @@
+/* ============================================================
+   Dashboard Styles
+   ============================================================ */
+
+/* ── Layout ───────────────────────────────────────────────── */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+/* ── Status Bar ───────────────────────────────────────────── */
+.dashboard-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 0.85rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    backdrop-filter: blur(10px);
+}
+
+.status-info {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+}
+
+.status-info strong {
+    color: var(--text-primary);
+}
+
+.refresh-timer {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ── Sensor Card ──────────────────────────────────────────── */
+.sensor-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.sensor-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--card-accent, var(--green-500));
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.sensor-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.2rem;
+}
+
+.sensor-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: var(--icon-bg, rgba(56, 163, 82, 0.12));
+    border: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.sensor-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.25rem;
+}
+
+.sensor-value {
+    font-family: var(--font-head);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.sensor-unit {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-left: 0.15rem;
+}
+
+.sensor-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+}
+
+.sensor-progress-wrap {
+    margin-top: 1rem;
+}
+
+.sensor-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+}
+
+/* Moisture Status Text */
+.moisture-status {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.moisture-status.green {
+    color: var(--green-300);
+}
+
+.moisture-status.amber {
+    color: var(--amber-400);
+}
+
+.moisture-status.red {
+    color: var(--red-400);
+}
+
+/* ── pH Scale Card ────────────────────────────────────────── */
+.ph-scale-bar {
+    position: relative;
+    height: 14px;
+    border-radius: 99px;
+    background: linear-gradient(90deg,
+            #c0392b 0%,
+            /* <4 */
+            #e67e22 14%,
+            /* 4-5 */
+            #f39c12 28%,
+            /* 5-6 */
+            #27ae60 42%,
+            /* 6-7 */
+            #2980b9 57%,
+            /* 7-8 */
+            #1a5276 72%,
+            /* 8-9 */
+            #4a235a 100%
+            /* >9 */
+        );
+    margin: 0.75rem 0 0.35rem;
+}
+
+.ph-scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.ph-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 3px solid var(--bg-primary);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 2px var(--green-400);
+    transition: left 0.8s cubic-bezier(.4, 0, .2, 1);
+    z-index: 2;
+}
+
+.ph-zone-label {
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-top: 0.6rem;
+}
+
+/* ── NPK Card ─────────────────────────────────────────────── */
+.npk-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.85rem;
+    margin-top: 1rem;
+}
+
+.npk-item {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: all var(--transition);
+}
+
+.npk-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.npk-letter {
+    font-family: var(--font-head);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.npk-name {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+}
+
+.npk-value-row {
+    margin-top: 0.6rem;
+}
+
+.npk-number {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.npk-unit {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+/* ── Pump Status Card ─────────────────────────────────────── */
+.pump-card {
+    --card-accent: #3b82f6;
+}
+
+.pump-status-display {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-top: 1rem;
+}
+
+.pump-icon-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+    transition: all var(--transition-slow);
+}
+
+.pump-icon-wrap.on {
+    background: rgba(59, 130, 246, 0.15);
+    border: 2px solid rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 24px rgba(59, 130, 246, 0.25);
+}
+
+.pump-icon-wrap.off {
+    background: rgba(255, 255, 255, 0.04);
+    border: 2px solid var(--border-color);
+}
+
+.pump-details h4 {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.pump-details h4.on {
+    color: var(--blue-400);
+}
+
+.pump-details h4.off {
+    color: var(--text-muted);
+}
+
+.pump-meta {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.pump-toggle-btn {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 0.65rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition);
+}
+
+.pump-toggle-btn.on {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--blue-400);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.pump-toggle-btn.off {
+    background: rgba(56, 163, 82, 0.12);
+    color: var(--green-300);
+    border: 1px solid rgba(56, 163, 82, 0.25);
+}
+
+.pump-toggle-btn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+}
+
+/* ── Crop Selector Panel ──────────────────────────────────── */
+.crop-selector-panel {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    backdrop-filter: blur(10px);
+}
+
+.crop-selector-panel label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.crop-chips {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.crop-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.95rem;
+    border-radius: 99px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.crop-chip:hover {
+    border-color: rgba(56, 163, 82, 0.4);
+    color: var(--green-300);
+}
+
+.crop-chip.active {
+    background: rgba(56, 163, 82, 0.15);
+    border-color: var(--green-400);
+    color: var(--green-300);
+    box-shadow: 0 0 12px rgba(56, 163, 82, 0.2);
+}
+
+/* ── Threshold Indicators ─────────────────────────────────── */
+.threshold-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+}
+
+.threshold-row .ideal {
+    color: var(--green-300);
+    font-weight: 600;
+}
+
+/* ── Alert Container ──────────────────────────────────────── */
+.alerts-container {
+    margin-bottom: 1.5rem;
+}
+
+/* ── Temp/Humidity Card ───────────────────────────────────── */
+.temp-humidity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+    margin-top: 0.75rem;
+}
+
+.mini-metric {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.mini-metric-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.35rem;
+}
+
+.mini-metric-val {
+    font-family: var(--font-head);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.mini-metric-lbl {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+}
+
+/* ── Last Updated ─────────────────────────────────────────── */
+.last-updated {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-align: right;
+    margin-top: 0.5rem;
+}
+
+/* ── Wide Cards (2-column) ────────────────────────────────── */
+.card-wide {
+    grid-column: span 2;
+}
+
+@media (max-width: 768px) {
+    .card-wide {
+        grid-column: span 1;
+    }
+
+    .npk-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}

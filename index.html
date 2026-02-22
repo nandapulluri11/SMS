@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoilSense – Smart Soil Monitoring System</title>
+  <meta name="description"
+    content="ESP32-based smart soil monitoring system for precision farming. Real-time soil moisture, pH, NPK, temperature, and humidity tracking." />
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/chatbot.css" />
+  <style>
+    /* ── Hero ──────────────────────────────────────────── */
+    .hero {
+      min-height: calc(100vh - 68px);
+      display: flex;
+      align-items: center;
+      padding: 4rem 0 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 60% 40%, rgba(39, 108, 53, 0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      background: rgba(56, 163, 82, 0.12);
+      border: 1px solid rgba(56, 163, 82, 0.25);
+      border-radius: 99px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--green-300);
+      letter-spacing: 0.06em;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 1.08;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title span {
+      color: var(--green-300);
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 2.5rem;
+      max-width: 500px;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 2rem;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+
+    .stat-item .stat-val {
+      font-family: var(--font-head);
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .stat-item .stat-lbl {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Hero Visual */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-device {
+      width: 340px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-card), 0 0 60px rgba(56, 163, 82, 0.12);
+      animation: float 5s ease-in-out infinite;
+    }
+
+    .device-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .device-header h4 {
+      font-size: 0.95rem;
+    }
+
+    .device-header p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .device-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .device-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .device-row-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .device-row-right {
+      font-family: var(--font-head);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .device-bar {
+      height: 5px;
+      border-radius: 99px;
+      margin-top: 0.25rem;
+      flex: 1;
+      background: rgba(255, 255, 255, .06);
+      overflow: hidden;
+    }
+
+    .device-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+    }
+
+    /* Floating badges */
+    .badge-float {
+      position: absolute;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 0.6rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge-float-1 {
+      top: 0;
+      left: -80px;
+      animation: float 6s ease-in-out infinite 1s;
+    }
+
+    .badge-float-2 {
+      bottom: 20px;
+      right: -60px;
+      animation: float 5.5s ease-in-out infinite 2s;
+    }
+
+    /* ── Data Flow Section ────────────────────────────────── */
+    .dataflow-section {
+      padding: 6rem 0;
+    }
+
+    .flow-steps {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin-top: 3rem;
+    }
+
+    .flow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      flex: 1;
+      min-width: 120px;
+      max-width: 160px;
+      padding: 0 0.5rem;
+    }
+
+    .flow-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.7rem;
+      margin: 0 auto 1rem;
+      border: 2px solid var(--border-color);
+      background: var(--bg-card);
+      box-shadow: 0 0 24px rgba(56, 163, 82, 0.12);
+      transition: all var(--transition);
+    }
+
+    .flow-step:hover .flow-icon {
+      border-color: var(--green-400);
+      box-shadow: 0 0 32px rgba(56, 163, 82, 0.3);
+      transform: translateY(-4px);
+    }
+
+    .flow-step h4 {
+      font-size: 0.95rem;
+      margin-bottom: .35rem;
+      color: var(--text-primary);
+    }
+
+    .flow-step p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .flow-arrow {
+      font-size: 1.5rem;
+      color: var(--green-500);
+      align-self: center;
+      flex-shrink: 0;
+      padding: 0 0.25rem;
+      margin-top: -1.5rem;
+    }
+
+    /* ── Features Section ─────────────────────────────────── */
+    .features-section {
+      padding: 5rem 0;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .feature-card {
+      padding: 1.75rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(10px);
+      transition: all var(--transition);
+    }
+
+    .feature-card:hover {
+      border-color: rgba(56, 163, 82, 0.3);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .feature-card-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .feature-card h4 {
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .feature-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ── CTA Section ──────────────────────────────────────── */
+    .cta-section {
+      padding: 6rem 0;
+      text-align: center;
+    }
+
+    .cta-box {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 4rem 3rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      backdrop-filter: blur(20px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(56, 163, 82, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-box h2 {
+      margin-bottom: 1rem;
+    }
+
+    .cta-box p {
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width:900px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-visual {
+        display: none;
+      }
+
+      .flow-arrow {
+        display: none;
+      }
+    }
+
+    @media (max-width:480px) {
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .hero-stats {
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">🌱</div>
+      <span>SoilSense</span>
+    </div>
+    <button class="nav-hamburger" onclick="toggleNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html" class="active">🏠 Home</a></li>
+      <li><a href="dashboard.html">📊 Dashboard</a></li>
+      <li><a href="analytics.html">📈 Analytics</a></li>
+      <li><a href="recommendations.html">🧠 Recommendations</a></li>
+      <li><a href="about.html">ℹ️ About</a></li>
+    </ul>
+    <div class="nav-user">
+      <div class="nav-user-badge" id="navUserBadge" style="display:none">
+        👨‍🌾 <span id="navUserName">Farmer</span>
+      </div>
+      <button class="btn-login-nav" id="navLoginBtn" onclick="location.href='login.html'">Login</button>
+      <button class="btn-logout" id="navLogoutBtn" style="display:none" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <main class="page-wrapper">
+
+    <!-- ── Hero ────────────────────────────────────────────── -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-content fade-up">
+            <div class="hero-eyebrow">
+              <span class="status-dot online pulse"></span>
+              ESP32-Powered Smart Agriculture
+            </div>
+            <h1 class="hero-title">
+              Monitor Your Soil.<br />
+              <span>Grow Smarter.</span>
+            </h1>
+            <p class="hero-desc">
+              SoilSense connects ESP32 sensors to a live web dashboard that tracks
+              soil moisture, pH, NPK nutrients, temperature, and humidity — giving
+              farmers real-time insights and AI-powered recommendations.
+            </p>
+            <div class="hero-actions">
+              <a href="dashboard.html" class="btn btn-primary">📊 View Live Dashboard</a>
+              <a href="about.html" class="btn btn-secondary">Learn How It Works</a>
+            </div>
+            <div class="hero-stats">
+              <div class="stat-item">
+                <div class="stat-val">5+</div>
+                <div class="stat-lbl">Sensor Types</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-val">Real-time</div>
+                <div class="stat-lbl">Data Updates</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-val">6</div>
+                <div class="stat-lbl">Crop Profiles</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-val">AI</div>
+                <div class="stat-lbl">Smart Alerts</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual fade-up fade-up-d2">
+            <div class="badge-float badge-float-1">
+              <span>💧</span> Moisture: 72%
+            </div>
+            <div class="hero-device">
+              <div class="device-header">
+                <div style="font-size:1.5rem">🌱</div>
+                <div>
+                  <h4>ESP32 Dashboard</h4>
+                  <p><span class="status-dot online pulse"></span> Live Feed · Rice Field</p>
+                </div>
+              </div>
+              <div class="device-rows">
+                <div>
+                  <div class="device-row">
+                    <div class="device-row-left">💧 Moisture</div>
+                    <div class="device-row-right">72%</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:.5rem;margin-top:.4rem">
+                    <div class="device-bar" style="flex:1">
+                      <div class="device-bar-fill progress-green" style="width:72%"></div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div class="device-row">
+                    <div class="device-row-left">🧪 pH Level</div>
+                    <div class="device-row-right">6.8</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:.5rem;margin-top:.4rem">
+                    <div class="device-bar" style="flex:1">
+                      <div class="device-bar-fill progress-green" style="width:56%"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="device-row">
+                  <div class="device-row-left">🌿 Nitrogen</div>
+                  <div class="device-row-right"><span class="badge badge-green">Medium</span></div>
+                </div>
+                <div class="device-row">
+                  <div class="device-row-left">🌡️ Temperature</div>
+                  <div class="device-row-right">28.4°C</div>
+                </div>
+                <div class="device-row">
+                  <div class="device-row-left">💦 Humidity</div>
+                  <div class="device-row-right">63%</div>
+                </div>
+                <div style="padding-top:.75rem;border-top:1px solid var(--border-color)">
+                  <div class="badge badge-green" style="width:100%;justify-content:center">✅ Soil Condition: Healthy
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="badge-float badge-float-2">
+              <span>🤖</span> AI: No Action Needed
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Data Flow ─────────────────────────────────────────── -->
+    <section class="dataflow-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-label">How It Works</div>
+          <h2 class="section-title">From Soil to Smartphone</h2>
+          <p class="section-subtitle">A seamless data pipeline from underground sensors to your fingertips, powered by
+            ESP32 and Wi-Fi.</p>
+        </div>
+        <div class="flow-steps">
+          <div class="flow-step fade-up">
+            <div class="flow-icon">🌍</div>
+            <h4>Sensors</h4>
+            <p>Moisture, pH, NPK, Temp & Humidity probes measure soil conditions</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step fade-up fade-up-d1">
+            <div class="flow-icon">🔌</div>
+            <h4>ESP32</h4>
+            <p>Microcontroller reads all sensors every 5 seconds and packages data</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step fade-up fade-up-d2">
+            <div class="flow-icon">📡</div>
+            <h4>Wi-Fi</h4>
+            <p>ESP32 sends data wirelessly to cloud server via HTTP/MQTT protocol</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step fade-up fade-up-d3">
+            <div class="flow-icon">☁️</div>
+            <h4>Cloud</h4>
+            <p>Server stores readings in database, processes alerts, runs AI rules</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step fade-up fade-up-d4">
+            <div class="flow-icon">🌐</div>
+            <h4>Website</h4>
+            <p>Responsive dashboard displays live data, charts, and smart tips</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step fade-up" style="animation-delay:.5s">
+            <div class="flow-icon">👨‍🌾</div>
+            <h4>Farmer</h4>
+            <p>Gets instant alerts and crop recommendations on any device</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Features ─────────────────────────────────────────── -->
+    <section class="features-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-label">Key Features</div>
+          <h2 class="section-title">Everything Your Farm Needs</h2>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card fade-up">
+            <div class="feature-card-icon" style="background:rgba(56,163,82,.12)">📊</div>
+            <h4>Live Dashboard</h4>
+            <p>Color-coded sensor readings auto-refresh every 5 seconds. Instant visual of soil health with progress
+              bars and status badges.</p>
+          </div>
+          <div class="feature-card fade-up fade-up-d1">
+            <div class="feature-card-icon" style="background:rgba(245,158,11,.12)">🧪</div>
+            <h4>pH & NPK Monitoring</h4>
+            <p>Track soil acidity and nitrogen, phosphorus, potassium nutrition levels with easy Low/Medium/High
+              indicators.</p>
+          </div>
+          <div class="feature-card fade-up fade-up-d2">
+            <div class="feature-card-icon" style="background:rgba(59,130,246,.12)">🤖</div>
+            <h4>AI Recommendations</h4>
+            <p>Smart rules engine analyzes sensor data and suggests irrigation, fertilization, and soil treatment
+              actions automatically.</p>
+          </div>
+          <div class="feature-card fade-up fade-up-d3">
+            <div class="feature-card-icon" style="background:rgba(239,68,68,.12)">🔔</div>
+            <h4>Instant Alerts</h4>
+            <p>On-screen alerts and warnings when conditions go out of range — before crop damage occurs. SMS/email
+              notification ready.</p>
+          </div>
+          <div class="feature-card fade-up">
+            <div class="feature-card-icon" style="background:rgba(139,92,246,.12)">🌾</div>
+            <h4>Crop Profiles</h4>
+            <p>Select from Rice, Wheat, Tomato, Cotton, Maize, and more. Thresholds automatically adjust to ideal values
+              for each crop.</p>
+          </div>
+          <div class="feature-card fade-up fade-up-d1">
+            <div class="feature-card-icon" style="background:rgba(56,163,82,.12)">📈</div>
+            <h4>Analytics & History</h4>
+            <p>View daily, weekly, and monthly trends with beautiful charts. Understand how your soil changes over time.
+            </p>
+          </div>
+          <div class="feature-card fade-up fade-up-d2">
+            <div class="feature-card-icon" style="background:rgba(59,130,246,.12)">💧</div>
+            <h4>Auto-Irrigation</h4>
+            <p>Monitor water pump status, last watering duration, and automatically trigger irrigation when moisture
+              drops below threshold.</p>
+          </div>
+          <div class="feature-card fade-up fade-up-d3">
+            <div class="feature-card-icon" style="background:rgba(245,158,11,.12)">📱</div>
+            <h4>Mobile Friendly</h4>
+            <p>Fully responsive design works beautifully on smartphones, tablets, and desktops. Farm from anywhere,
+              anytime.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA ───────────────────────────────────────────────── -->
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-box fade-up">
+          <h2>Ready to Monitor Your Farm?</h2>
+          <p>Open the live dashboard to see real-time soil data, AI analysis, and crop health recommendations.</p>
+          <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+            <a href="dashboard.html" class="btn btn-primary">🚀 Open Dashboard</a>
+            <a href="login.html" class="btn btn-secondary">👨‍🌾 Farmer Login</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>🌱 <strong>SoilSense</strong> – ESP32 Smart Soil Monitoring System &nbsp;|&nbsp;
+        Built for Smart Agriculture · Science Expo 2026 &nbsp;|&nbsp;
+        <a href="about.html">About the Project</a>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    function toggleNav() {
+      document.getElementById('navLinks').classList.toggle('open');
+    }
+    // Auth state
+    const u = localStorage.getItem('soil_user');
+    if (u) {
+      document.getElementById('navUserBadge').style.display = 'flex';
+      document.getElementById('navUserName').textContent = JSON.parse(u).name;
+      document.getElementById('navLoginBtn').style.display = 'none';
+      document.getElementById('navLogoutBtn').style.display = 'inline-block';
+    }
+    function logout() {
+      localStorage.removeItem('soil_session');
+      location.reload();
+    }
+  </script>
+  <script src="js/chatbot.js"></script>
+</body>
+
+</html>
