@@ -34,7 +34,7 @@
 }
 
 .chart-card:hover {
-    border-color: rgba(56, 163, 82, .28);
+    border-color: rgba(52, 211, 153, 0.3);
     transform: translateY(-2px);
 }
 
@@ -129,4 +129,40 @@
     .chart-card.wide {
         grid-column: span 1;
     }
+}
+
+/* Year selector cards similar to screenshot */
+.year-selector {
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+.year-card {
+    flex: 1 1 120px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: .75rem;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+}
+.year-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(52,211,153,0.6);
+}
+.year-card.active {
+    background: #d1fae5;
+    border-color: #22c55e;
+}
+.year-card span {
+    display: block;
+    font-size: .75rem;
+    color: var(--text-muted);
+}
+
+/* hide original select dropdown since year cards are used */
+#yearSelect {
+    display: none;
 }

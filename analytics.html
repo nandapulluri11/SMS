@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Analytics – SoilSense</title>
+    <title>Farm Records – SoilSense</title>
     <meta name="description"
         content="Historical soil sensor data analytics and graphs — moisture, pH, NPK trends over time." />
     <link rel="stylesheet" href="styles/main.css" />
@@ -42,22 +42,46 @@
     <main class="page-wrapper">
         <div class="container">
             <div class="page-title-bar fade-up">
-                <div class="label">📈 Historical Data</div>
-                <h1>Soil Analytics</h1>
-                <p>View trends and patterns from past sensor readings to make informed farming decisions</p>
+                <div class="label">Farm Records</div>
+                <h1>Farm Records</h1>
+                <p>Browse historical data by year and review key performance indicators</p>
+            </div>
+            
+            <!-- Year selector cards -->
+            <div class="year-selector fade-up" id="yearSelector">
+                <!-- cards generated dynamically -->
             </div>
 
             <!-- Controls -->
             <div class="analytics-controls fade-up">
-                <div class="tab-group">
-                    <button class="tab-btn active" id="tabDaily" onclick="setRange('daily')">Daily</button>
-                    <button class="tab-btn" id="tabWeekly" onclick="setRange('weekly')">Weekly</button>
-                    <button class="tab-btn" id="tabMonthly" onclick="setRange('monthly')">Monthly</button>
+                <div style="display:flex; flex-wrap:wrap; gap:1rem; align-items:center;">
+                    <div class="tab-group">
+                        <button class="tab-btn active" id="tabDaily" onclick="setRange('daily')">Daily</button>
+                        <button class="tab-btn" id="tabWeekly" onclick="setRange('weekly')">Weekly</button>
+                        <button class="tab-btn" id="tabMonthly" onclick="setRange('monthly')">Monthly</button>
+                        <button class="tab-btn" id="tabYearly" onclick="setRange('yearly')">Yearly</button>
+                    </div>
+                    <div style="display:flex; gap:.5rem;">
+                        <button class="tab-btn" id="chartTypeBar" onclick="setChartType('bar')" style="background:#22c55e; border:1px solid #22c55e;">📊 Bar</button>
+                        <button class="tab-btn" id="chartTypeLine" onclick="setChartType('line')">📈 Line</button>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                    <label for="yearSelect" style="font-size:.88rem; color:var(--text-muted);">Year:</label>
+                    <select id="yearSelect" onchange="onYearChange()" style="padding:.5rem .8rem; border-radius:.5rem; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary); font-size:.88rem; cursor:pointer;">
+                        <option value="">All Years</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="exportToCSV()" style="padding:.5rem 1rem; font-size:.88rem">⬇️ Export CSV</button>
+                    <button class="btn btn-secondary" onclick="refreshCharts()" style="padding:.5rem 1.1rem; font-size:.88rem">🔄 Refresh</button>
                 </div>
                 <div class="analytics-meta" id="analyticsMeta">Loading data...</div>
-                <button class="btn btn-secondary" onclick="refreshCharts()"
-                    style="padding:.5rem 1.1rem; font-size:.88rem">🔄 Refresh</button>
             </div>
+
+            <!-- KPI Cards -->
+            <div id="kpiContainer" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:1rem; margin-bottom:2rem;"></div>
+
+            <!-- Alerts Section -->
+            <div id="alertsContainer" style="display:none; margin-bottom:2rem;"></div>
 
             <!-- Charts Grid -->
             <div class="charts-grid">
@@ -126,6 +150,30 @@
                     <div class="chart-wrap"><canvas id="humChart"></canvas></div>
                 </div>
 
+                <!-- Sample Rainfall Graph -->
+                <div class="chart-card fade-up">
+                    <div class="chart-card-header">
+                        <div>
+                            <h4>☔ Sample Rainfall Trend</h4>
+                            <p>Demo monthly rainfall pattern (mm)</p>
+                        </div>
+                        <span class="badge badge-blue">Sample</span>
+                    </div>
+                    <div class="chart-wrap"><canvas id="rainChart"></canvas></div>
+                </div>
+
+                <!-- Sample Yield Graph -->
+                <div class="chart-card fade-up">
+                    <div class="chart-card-header">
+                        <div>
+                            <h4>🌾 Sample Yield Projection</h4>
+                            <p>Demo yield forecast (tons/acre)</p>
+                        </div>
+                        <span class="badge badge-green">Sample</span>
+                    </div>
+                    <div class="chart-wrap"><canvas id="yieldChart"></canvas></div>
+                </div>
+
             </div><!-- /charts-grid -->
 
             <!-- Summary Table -->
@@ -174,8 +222,8 @@
         function doLogout() { localStorage.removeItem('soil_user'); location.reload(); }
 
         /* ── Chart.js defaults ─────────────────────────────────────── */
-        Chart.defaults.color = '#9ecfaa';
-        Chart.defaults.borderColor = 'rgba(56,163,82,.1)';
+        Chart.defaults.color = '#4b7c59';
+        Chart.defaults.borderColor = 'rgba(107, 157, 136, 0.3)';
         Chart.defaults.font.family = "'Inter', sans-serif";
         Chart.defaults.font.size = 11;
 
@@ -186,78 +234,185 @@
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: 'rgba(10,25,14,.95)',
-                    borderColor: 'rgba(56,163,82,.3)',
+                    backgroundColor: 'rgba(0,0,0,.8)',
+                    borderColor: color,
                     borderWidth: 1,
-                    titleColor: '#9ecfaa',
-                    bodyColor: '#e8f5ea',
-                    padding: 10,
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    padding: 8,
+                    displayColors: false,
                 }
             },
             scales: {
                 x: {
-                    grid: { color: 'rgba(56,163,82,.07)' },
-                    ticks: { maxTicksLimit: 8, color: '#5a8c65' },
+                    grid: { display: false },
+                    ticks: { color: '#4b7c59', maxTicksLimit: 12, font: { size: 10 } },
+                    barPercentage: 0.8,
+                    categoryPercentage: 0.9,
                 },
                 y: {
                     min, max,
-                    grid: { color: 'rgba(56,163,82,.07)' },
-                    ticks: { color: '#5a8c65' },
+                    grid: { color: 'rgba(107, 157, 136, 0.15)' },
+                    ticks: { color: '#4b7c59' },
                 }
-            },
-            elements: { point: { radius: 2, hoverRadius: 5 }, line: { tension: 0.4, borderWidth: 2 } }
+            }
         });
 
         let charts = {};
         let currentRange = 'daily';
-
-        function makeGradient(ctx, color) {
-            const g = ctx.createLinearGradient(0, 0, 0, 200);
-            g.addColorStop(0, color + '55');
-            g.addColorStop(1, color + '05');
-            return g;
-        }
-
-        function buildDataset(history, field) {
-            return history.map(r => ({ x: new Date(r.timestamp).toLocaleTimeString(), y: +r[field]?.toFixed(2) }));
-        }
+        let selectedYear = new Date().getFullYear().toString();
+        let chartType = 'bar';
+        let isDarkMode = localStorage.getItem('soilDarkMode') === 'true';
 
         function avg(arr) { return arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : '--'; }
         function mn(arr) { return arr.length ? Math.min(...arr).toFixed(1) : '--'; }
         function mx(arr) { return arr.length ? Math.max(...arr).toFixed(1) : '--'; }
 
+        // Generate year cards dynamically
+        function initYearCards() {
+            const container = document.getElementById('yearSelector');
+            if (!container) return;
+            const now = new Date().getFullYear();
+            container.innerHTML = '';
+            const years = [now, now - 1, now - 2];
+            const labels = ['Current Year', 'Last Year', 'Archive'];
+            years.forEach((year, i) => {
+                const card = document.createElement('div');
+                card.className = 'year-card' + (year === parseInt(selectedYear) ? ' active' : '');
+                card.dataset.year = year.toString();
+                card.innerHTML = `${year}<br><span>${labels[i]}</span>`;
+                card.addEventListener('click', () => {
+                    container.querySelectorAll('.year-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    selectedYear = year.toString();
+                    const sel = document.getElementById('yearSelect');
+                    if (sel) sel.value = selectedYear;
+                    refreshCharts();
+                });
+                container.appendChild(card);
+            });
+        }
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('soilDarkMode', isDarkMode);
+            document.body.style.filter = isDarkMode ? 'invert(1) hue-rotate(180deg)' : 'none';
+        }
+
+        function setChartType(type) {
+            chartType = type;
+            document.getElementById('chartTypeBar').style.background = type === 'bar' ? '#22c55e' : 'transparent';
+            document.getElementById('chartTypeBar').style.border = type === 'bar' ? '1px solid #22c55e' : 'none';
+            document.getElementById('chartTypeLine').style.background = type === 'line' ? '#06b6d4' : 'transparent';
+            document.getElementById('chartTypeLine').style.border = type === 'line' ? '1px solid #06b6d4' : 'none';
+            Object.values(charts).forEach(c => { c.config.type = type; c.update('none'); });
+        }
+
+        function exportToCSV() {
+            let history;
+            if (selectedYear && currentRange !== 'yearly') {
+                history = window.SoilData.getFilteredHistoryByYear(selectedYear);
+            } else if (currentRange !== 'yearly') {
+                history = window.SoilData.getFilteredHistory(currentRange);
+            } else {
+                history = window.SoilData.getFilteredHistoryByYear(selectedYear) || window.SoilData.getHistory();
+            }
+            if (!history.length) { alert('No data to export'); return; }
+            const headers = ['Timestamp', 'Moisture (%)', 'pH', 'Nitrogen', 'Phosphorus', 'Potassium', 'Temperature (°C)', 'Humidity (%)'];
+            const rows = history.map(r => [
+                new Date(r.timestamp).toLocaleString(),
+                r.moisture, r.ph, r.n, r.p, r.k, r.temperature, r.humidity
+            ]);
+            const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `soil-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        function createKPICards(history, SD) {
+            const container = document.getElementById('kpiContainer');
+            const rawM = history.map(r => r.moisture);
+            const rawPH = history.map(r => r.ph);
+            const avgMoisture = history.length ? +avg(rawM) : '--';
+            const soilHealth = history.length ? Math.min(100, Math.max(0, Math.round((+avg(rawPH)) * 12))) : '--';
+            const totalYield = 4.8; // sample value for UI demo
+            const rainfall = 128;   // sample value for UI demo
+            const metrics = [
+                { name: '💧 Avg. Moisture', value: avgMoisture, unit: '%', color: '#06b6d4' },
+                { name: '🌱 Soil Health', value: soilHealth, unit: '/100', color: '#10b981' },
+                { name: '🌾 Total Yield', value: totalYield, unit: 't', color: '#f59e0b' },
+                { name: '☔ Rainfall', value: rainfall, unit: 'mm', color: '#60a5fa' },
+            ];
+            container.innerHTML = metrics.map(m => {
+                const hasValue = m.value !== '--';
+                const status = hasValue ? '✅ Updated' : '—';
+                return `<div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:.5rem; padding:1rem; text-align:center;">
+                    <div style="font-size:.75rem; color:var(--text-muted); margin-bottom:.25rem;">${m.name}</div>
+                    <div style="font-size:1.5rem; font-weight:bold; color:${m.color}; margin-bottom:.25rem;">${m.value}${m.unit}</div>
+                    <div style="font-size:.7rem; color:var(--text-muted);">Analytics Snapshot</div>
+                    <div style="font-size:.75rem; margin-top:.5rem; padding:.25rem .5rem; background:${hasValue ? '#10b98133' : '#94a3b833'}; border-radius:.25rem; color:${hasValue ? '#10b981' : '#94a3b8'};">${status}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function createAlerts(history, SD) {
+            const container = document.getElementById('alertsContainer');
+            const crop = SD.getCurrentCrop();
+            const profile = SD.CROP_PROFILES[crop];
+            const alerts = [];
+            if (history.length) {
+                const last = history[history.length - 1];
+                if (last.moisture < profile.moisture.min - 5) alerts.push({ type: 'critical', msg: '💧 Moisture critically low' });
+                if (last.ph < profile.ph.min - 0.5 || last.ph > profile.ph.max + 0.5) alerts.push({ type: 'warning', msg: '🧪 pH out of range' });
+                if (last.n < profile.n.min - 10) alerts.push({ type: 'warning', msg: '🌿 Nitrogen low' });
+                if (last.temperature > profile.temp.max + 5) alerts.push({ type: 'critical', msg: '🌡️ Temperature too high' });
+            }
+            if (alerts.length) {
+                container.style.display = 'block';
+                container.innerHTML = `<h4 style="margin-bottom:.75rem;">🔔 Active Alerts</h4>` + alerts.map(a => `<div style="background:${a.type === 'critical' ? '#ef444455' : '#f5991155'}; border-left:4px solid ${a.type === 'critical' ? '#ef4444' : '#f59e0b'}; padding:.75rem 1rem; border-radius:.5rem; margin-bottom:.5rem; color:var(--text-primary);">${a.msg}</div>`).join('');
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
         function initCharts() {
             function mkChart(id, label, color, minY, maxY) {
                 const ctx = document.getElementById(id).getContext('2d');
                 return new Chart(ctx, {
-                    type: 'line',
+                    type: 'bar',
                     data: {
+                        labels: [],
                         datasets: [{
                             label,
                             data: [],
                             borderColor: color,
-                            backgroundColor: makeGradient(ctx, color),
-                            fill: true,
+                            backgroundColor: color + '80',
+                            borderWidth: 1,
+                            borderRadius: 4
                         }]
                     },
                     options: CHART_OPTS(label, color, minY, maxY)
                 });
             }
 
-            charts.moisture = mkChart('moistureChart', 'Soil Moisture (%)', '#3b82f6', 0, 100);
+            charts.moisture = mkChart('moistureChart', 'Soil Moisture (%)', '#06b6d4', 0, 100);
             charts.ph = mkChart('phChart', 'pH Level', '#f59e0b', 3, 10);
             charts.temp = mkChart('tempChart', 'Temperature (°C)', '#ef4444', 5, 50);
-            charts.hum = mkChart('humChart', 'Humidity (%)', '#60a5fa', 10, 100);
+            charts.hum = mkChart('humChart', 'Humidity (%)', '#06b6d4', 10, 100);
 
-            // NPK multi-line
+            // NPK multi-bar (grouped bars for each dataset)
             const npkCtx = document.getElementById('npkChart').getContext('2d');
             charts.npk = new Chart(npkCtx, {
-                type: 'line',
+                type: 'bar',
                 data: {
+                    labels: [],
                     datasets: [
-                        { label: 'Nitrogen (N)', data: [], borderColor: '#5ec97a', backgroundColor: 'transparent', borderWidth: 2 },
-                        { label: 'Phosphorus (P)', data: [], borderColor: '#f59e0b', backgroundColor: 'transparent', borderWidth: 2 },
-                        { label: 'Potassium (K)', data: [], borderColor: '#60a5fa', backgroundColor: 'transparent', borderWidth: 2 },
+                        { label: 'Nitrogen (N)', data: [], borderColor: '#22c55e', backgroundColor: '#22c55e80', borderWidth: 1, borderRadius: 3 },
+                        { label: 'Phosphorus (P)', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b80', borderWidth: 1, borderRadius: 3 },
+                        { label: 'Potassium (K)', data: [], borderColor: '#06b6d4', backgroundColor: '#06b6d480', borderWidth: 1, borderRadius: 3 },
                     ]
                 },
                 options: {
@@ -266,66 +421,208 @@
                         ...CHART_OPTS('NPK').plugins,
                         legend: {
                             display: true,
-                            labels: { color: '#9ecfaa', boxWidth: 12, font: { size: 11 } }
+                            labels: { color: '#666', boxWidth: 12, font: { size: 11 } }
                         }
                     }
                 }
             });
+
+            const sampleMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            const rainCtx = document.getElementById('rainChart').getContext('2d');
+            charts.rain = new Chart(rainCtx, {
+                type: 'line',
+                data: {
+                    labels: sampleMonths,
+                    datasets: [{
+                        label: 'Rainfall (mm)',
+                        data: [42, 58, 76, 68, 90, 74],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59,130,246,0.22)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 3
+                    }]
+                },
+                options: CHART_OPTS('Rainfall (mm)', '#3b82f6', 0, 120)
+            });
+
+            const yieldCtx = document.getElementById('yieldChart').getContext('2d');
+            charts.yield = new Chart(yieldCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Plot A', 'Plot B', 'Plot C', 'Plot D', 'Plot E'],
+                    datasets: [{
+                        label: 'Yield (tons/acre)',
+                        data: [4.1, 4.6, 4.3, 4.9, 5.1],
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34,197,94,0.5)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: CHART_OPTS('Yield (tons/acre)', '#22c55e', 0, 6)
+            });
+        }
+
+        function populateYearSelect() {
+            const years = window.SoilData.getAllYears();
+            const select = document.getElementById('yearSelect');
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">All Years</option>';
+            years.forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                select.appendChild(opt);
+            });
+            if (currentValue) select.value = currentValue;
+        }
+
+        function onYearChange() {
+            selectedYear = document.getElementById('yearSelect').value;
+            refreshCharts();
         }
 
         function refreshCharts() {
-            const history = window.SoilData.getFilteredHistory(currentRange);
+            let history;
+            if (selectedYear && currentRange === 'yearly') {
+                history = window.SoilData.getFilteredHistoryByYear(selectedYear);
+            } else if (selectedYear && currentRange !== 'yearly') {
+                history = window.SoilData.getFilteredHistoryByYear(selectedYear);
+            } else {
+                history = window.SoilData.getFilteredHistory(currentRange);
+            }
             const meta = document.getElementById('analyticsMeta');
             meta.textContent = `${history.length} readings · ${currentRange.charAt(0).toUpperCase() + currentRange.slice(1)} view`;
 
             if (!history.length) { meta.textContent = 'No data for selected range'; return; }
 
-            const labels = history.map(r => {
-                const d = new Date(r.timestamp);
-                return currentRange === 'daily' ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    : currentRange === 'weekly' ? d.toLocaleDateString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' })
-                        : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-            });
-
-            function setData(chart, data) {
-                chart.data.labels = labels;
-                chart.data.datasets[0].data = data;
-                chart.update('active');
+            let labels;
+            if (currentRange === 'yearly' && selectedYear) {
+                // Group by months
+                const monthData = {};
+                history.forEach(r => {
+                    const d = new Date(r.timestamp);
+                    const month = d.toLocaleString('default', { month: 'short' });
+                    if (!monthData[month]) monthData[month] = [];
+                    monthData[month].push(r);
+                });
+                labels = Object.keys(monthData);
+            } else if (currentRange === 'yearly') {
+                // Group by months across all years
+                const monthData = {};
+                history.forEach(r => {
+                    const d = new Date(r.timestamp);
+                    const monthYear = d.toLocaleString('default', { year: 'numeric', month: 'short' });
+                    if (!monthData[monthYear]) monthData[monthYear] = [];
+                    monthData[monthYear].push(r);
+                });
+                labels = Object.keys(monthData).sort();
+            } else {
+                labels = history.map(r => {
+                    const d = new Date(r.timestamp);
+                    return currentRange === 'daily' ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : currentRange === 'weekly' ? d.toLocaleDateString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' })
+                            : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                });
             }
 
-            const M = history.map(r => r.moisture), pH = history.map(r => r.ph),
-                T = history.map(r => r.temperature), H = history.map(r => r.humidity),
-                N = history.map(r => r.n), P = history.map(r => r.p), K = history.map(r => r.k);
+            function aggregateByLabel(history, field, labels) {
+                if (currentRange === 'yearly' && selectedYear) {
+                    // Group by months
+                    const monthData = {};
+                    history.forEach(r => {
+                        const d = new Date(r.timestamp);
+                        const month = d.toLocaleString('default', { month: 'short' });
+                        if (!monthData[month]) monthData[month] = [];
+                        monthData[month].push(r[field]);
+                    });
+                    return labels.map(m => {
+                        const vals = monthData[m] || [];
+                        return vals.length ? +(vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2) : 0;
+                    });
+                } else if (currentRange === 'yearly') {
+                    // Group by month-year
+                    const monthYearData = {};
+                    history.forEach(r => {
+                        const d = new Date(r.timestamp);
+                        const monthYear = d.toLocaleString('default', { year: 'numeric', month: 'short' });
+                        if (!monthYearData[monthYear]) monthYearData[monthYear] = [];
+                        monthYearData[monthYear].push(r[field]);
+                    });
+                    return labels.map(my => {
+                        const vals = monthYearData[my] || [];
+                        return vals.length ? +(vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2) : 0;
+                    });
+                } else {
+                    return history.map(r => +r[field]);
+                }
+            }
 
-            setData(charts.moisture, M);
-            setData(charts.ph, pH);
-            setData(charts.temp, T);
-            setData(charts.hum, H);
+            // Ensure we have labels and data
+            if (!labels || labels.length === 0) labels = ['No Data'];
+            const M = aggregateByLabel(history, 'moisture', labels);
+            const pH = aggregateByLabel(history, 'ph', labels);
+            const T = aggregateByLabel(history, 'temperature', labels);
+            const H = aggregateByLabel(history, 'humidity', labels);
+            const N = aggregateByLabel(history, 'n', labels);
+            const P = aggregateByLabel(history, 'p', labels);
+            const K = aggregateByLabel(history, 'k', labels);
+            // ensure data arrays match label count
+            const padData = (d, len) => [...d, ...Array(Math.max(0, len - d.length)).fill(0)].slice(0, len);
+            
+            // Create KPI cards and alerts
+            createKPICards(history, window.SoilData);
+            createAlerts(history, window.SoilData);
+            
+            // For stats table, use raw values
+            const rawHistory = history;
+            const rawM = rawHistory.map(r => r.moisture), rawpH = rawHistory.map(r => r.ph),
+                rawT = rawHistory.map(r => r.temperature), rawH = rawHistory.map(r => r.humidity),
+                rawN = rawHistory.map(r => r.n), rawP = rawHistory.map(r => r.p), rawK = rawHistory.map(r => r.k);
+
+            // Update chart data with proper length matching
+            const labelLen = labels.length;
+            charts.moisture.data.labels = labels;
+            charts.moisture.data.datasets[0].data = padData(M, labelLen);
+            charts.moisture.update('none');
+
+            charts.ph.data.labels = labels;
+            charts.ph.data.datasets[0].data = padData(pH, labelLen);
+            charts.ph.update('none');
+
+            charts.temp.data.labels = labels;
+            charts.temp.data.datasets[0].data = padData(T, labelLen);
+            charts.temp.update('none');
+
+            charts.hum.data.labels = labels;
+            charts.hum.data.datasets[0].data = padData(H, labelLen);
+            charts.hum.update('none');
 
             charts.npk.data.labels = labels;
-            charts.npk.data.datasets[0].data = N;
-            charts.npk.data.datasets[1].data = P;
-            charts.npk.data.datasets[2].data = K;
-            charts.npk.update('active');
+            charts.npk.data.datasets[0].data = padData(N, labelLen);
+            charts.npk.data.datasets[1].data = padData(P, labelLen);
+            charts.npk.data.datasets[2].data = padData(K, labelLen);
+            charts.npk.update('none');
 
             // Avg badges
-            document.getElementById('moistureAvgBadge').textContent = `Avg: ${avg(M)}%`;
-            document.getElementById('phAvgBadge').textContent = `Avg: ${avg(pH)}`;
-            document.getElementById('tempAvgBadge').textContent = `Avg: ${avg(T)}°C`;
-            document.getElementById('humAvgBadge').textContent = `Avg: ${avg(H)}%`;
+            document.getElementById('moistureAvgBadge').textContent = `Avg: ${avg(rawM)}%`;
+            document.getElementById('phAvgBadge').textContent = `Avg: ${avg(rawpH)}`;
+            document.getElementById('tempAvgBadge').textContent = `Avg: ${avg(rawT)}°C`;
+            document.getElementById('humAvgBadge').textContent = `Avg: ${avg(rawH)}%`;
 
             // Stats table
             const SD = window.SoilData;
             const crop = SD.getCurrentCrop();
             const p = SD.CROP_PROFILES[crop];
             const rows = [
-                { name: '💧 Moisture', field: 'moisture', vals: M, unit: '%', ideal: `${p.moisture.min}–${p.moisture.max}` },
-                { name: '🧪 pH', field: 'ph', vals: pH, unit: '', ideal: `${p.ph.min}–${p.ph.max}` },
-                { name: '🌿 Nitrogen', field: 'n', vals: N, unit: 'mg/kg', ideal: `${p.n.min}–${p.n.max}` },
-                { name: '🌻 Phosphorus', field: 'p', vals: P, unit: 'mg/kg', ideal: `${p.p.min}–${p.p.max}` },
-                { name: '🍃 Potassium', field: 'k', vals: K, unit: 'mg/kg', ideal: `${p.k.min}–${p.k.max}` },
-                { name: '🌡️ Temperature', field: 'temperature', vals: T, unit: '°C', ideal: `${p.temp.min}–${p.temp.max}` },
-                { name: '💦 Humidity', field: 'humidity', vals: H, unit: '%', ideal: `${p.humidity.min}–${p.humidity.max}` },
+                { name: '💧 Moisture', field: 'moisture', vals: rawM, unit: '%', ideal: `${p.moisture.min}–${p.moisture.max}` },
+                { name: '🧪 pH', field: 'ph', vals: rawpH, unit: '', ideal: `${p.ph.min}–${p.ph.max}` },
+                { name: '🌿 Nitrogen', field: 'n', vals: rawN, unit: 'mg/kg', ideal: `${p.n.min}–${p.n.max}` },
+                { name: '🌻 Phosphorus', field: 'p', vals: rawP, unit: 'mg/kg', ideal: `${p.p.min}–${p.p.max}` },
+                { name: '🍃 Potassium', field: 'k', vals: rawK, unit: 'mg/kg', ideal: `${p.k.min}–${p.k.max}` },
+                { name: '🌡️ Temperature', field: 'temperature', vals: rawT, unit: '°C', ideal: `${p.temp.min}–${p.temp.max}` },
+                { name: '💦 Humidity', field: 'humidity', vals: rawH, unit: '%', ideal: `${p.humidity.min}–${p.humidity.max}` },
             ];
             const tbody = document.getElementById('statsTableBody');
             tbody.innerHTML = rows.map(r => {
@@ -344,18 +641,28 @@
 
         function setRange(range) {
             currentRange = range;
-            ['daily', 'weekly', 'monthly'].forEach(r => {
-                document.getElementById('tab' + r.charAt(0).toUpperCase() + r.slice(1)).classList.toggle('active', r === range);
+            ['daily', 'weekly', 'monthly', 'yearly'].forEach(r => {
+                const btn = document.getElementById('tab' + r.charAt(0).toUpperCase() + r.slice(1));
+                if (btn) btn.classList.toggle('active', r === range);
             });
             refreshCharts();
         }
 
+        // Apply theme on load
+        if (isDarkMode) document.body.style.filter = 'invert(1) hue-rotate(180deg)';
+
         // Init
         initCharts();
+        populateYearSelect();
+        initYearCards();
         refreshCharts();
 
         // Auto-refresh every 10s with new live data
-        window.SoilData.onLiveData(() => refreshCharts());
+        window.SoilData.onLiveData(() => {
+            populateYearSelect();
+            initYearCards();
+            refreshCharts();
+        });
         window.SoilData.startLiveData(10000);
     </script>
 </body>

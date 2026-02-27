@@ -95,6 +95,8 @@ function randomWalk(current, step, min, max) {
 
 /** Generate next simulated reading */
 function _nextReading() {
+  if (!isSensorPowerOn()) return getReading();
+
   _sensorState.moisture    = randomWalk(_sensorState.moisture,    3,   0,  100);
   _sensorState.ph          = randomWalk(_sensorState.ph,          0.2, 3.5, 9.5);
   _sensorState.n           = randomWalk(_sensorState.n,           4,   0,  100);
@@ -137,7 +139,23 @@ function setCurrentCrop(cropKey) {
 
 /* ── History (localStorage) ──────────────────────────────── */
 const HISTORY_KEY = 'soil_history';
+const SENSOR_POWER_KEY = 'soil_sensor_power';
 const MAX_HISTORY = 200;
+
+function isSensorPowerOn() {
+  const state = localStorage.getItem(SENSOR_POWER_KEY);
+  return state !== 'off';
+}
+
+function setSensorPower(on) {
+  localStorage.setItem(SENSOR_POWER_KEY, on ? 'on' : 'off');
+}
+
+function toggleSensorPower() {
+  const next = !isSensorPowerOn();
+  setSensorPower(next);
+  return next;
+}
 
 function getHistory() {
   try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
@@ -159,6 +177,25 @@ function getFilteredHistory(range) {
     if (range === 'monthly') return (now - d) <= 30 * 24 * 3600 * 1000;
     return true;
   });
+}
+
+function getFilteredHistoryByYear(year) {
+  const hist = getHistory();
+  if (!year) return hist;
+  return hist.filter(r => {
+    const d = new Date(r.timestamp);
+    return d.getFullYear() === parseInt(year);
+  });
+}
+
+function getAllYears() {
+  const hist = getHistory();
+  const years = new Set();
+  hist.forEach(r => {
+    const d = new Date(r.timestamp);
+    years.add(d.getFullYear());
+  });
+  return Array.from(years).sort((a, b) => b - a);
 }
 
 /* ── Seed history if empty ───────────────────────────────── */
@@ -290,7 +327,7 @@ function startLiveData(intervalMs = 5000) {
   if (_liveInterval) clearInterval(_liveInterval);
   const emit = () => {
     const r = _nextReading();
-    appendHistory(r);
+    if (isSensorPowerOn()) appendHistory(r);
     _liveListeners.forEach(fn => fn(r));
   };
   emit();
@@ -305,12 +342,17 @@ window.SoilData = {
   getReading,
   getHistory,
   getFilteredHistory,
+  getFilteredHistoryByYear,
+  getAllYears,
   seedHistory,
   getRecommendations,
   getAlerts,
   npkLevel,
   phCategory,
   moistureColor,
+  isSensorPowerOn,
+  setSensorPower,
+  toggleSensorPower,
   onLiveData,
   startLiveData,
 };

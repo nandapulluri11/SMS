@@ -14,8 +14,8 @@
     .hero {
       min-height: calc(100vh - 68px);
       display: flex;
-      align-items: center;
-      padding: 4rem 0 5rem;
+      align-items: flex-start;
+      padding: 1.25rem 0 4rem;
       position: relative;
       overflow: hidden;
     }
@@ -24,15 +24,48 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse 70% 60% at 60% 40%, rgba(39, 108, 53, 0.18) 0%, transparent 70%);
+      background: rgba(0, 0, 0, 0.54);
       pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(8, 20, 16, 0.74) 0%, rgba(8, 20, 16, 0.46) 42%, rgba(8, 20, 16, 0.2) 65%, rgba(8, 20, 16, 0.08) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero-bg-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
     }
 
     .hero-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 4rem;
+      gap: 2.5rem;
       align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-content {
+      color: #f3fff6;
+      max-width: 680px;
+      padding: 1.35rem 1.35rem 1.2rem;
+      border-radius: 20px;
+      background: rgba(8, 20, 16, 0.26);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(7px);
+      box-shadow: 0 8px 34px rgba(0, 0, 0, 0.24);
     }
 
     .hero-eyebrow {
@@ -40,67 +73,449 @@
       align-items: center;
       gap: 0.5rem;
       padding: 0.4rem 1rem;
-      background: rgba(56, 163, 82, 0.12);
-      border: 1px solid rgba(56, 163, 82, 0.25);
+      background: rgba(34, 197, 94, 0.25);
+      border: 1px solid rgba(34, 197, 94, 0.6);
       border-radius: 99px;
       font-size: 0.82rem;
       font-weight: 600;
-      color: var(--green-300);
+      color: #22c55e;
       letter-spacing: 0.06em;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.15rem;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
     }
 
     .hero-title {
       font-size: clamp(2.2rem, 5vw, 4rem);
-      line-height: 1.08;
-      margin-bottom: 1.5rem;
+      line-height: 1.03;
+      margin-bottom: 1.1rem;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(0, 0, 0, 0.6);
+      color: #ffffff;
     }
 
     .hero-title span {
-      color: var(--green-300);
+      color: #22c55e;
+      text-shadow: 0 2px 12px rgba(34, 197, 94, 0.4);
     }
 
     .hero-desc {
-      font-size: 1.1rem;
-      color: var(--text-secondary);
-      margin-bottom: 2.5rem;
-      max-width: 500px;
-      line-height: 1.7;
+      font-size: 1.18rem;
+      color: #f1fff4;
+      margin-bottom: 1.7rem;
+      max-width: 560px;
+      line-height: 1.6;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
     }
 
     .hero-actions {
       display: flex;
       gap: 1rem;
       flex-wrap: wrap;
+      margin-bottom: 1.1rem;
+    }
+
+    .hero-actions .btn {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      transition: all var(--transition);
+      font-weight: 700;
+      min-height: 54px;
+      border-radius: 999px;
+      padding: 0.8rem 1.9rem;
+    }
+
+    .hero-actions .btn-primary {
+      background: linear-gradient(135deg, #117a52, #22c55e);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-actions .btn-secondary {
+      background: rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(6px);
+    }
+
+    .hero-actions .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.24);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.72);
+    }
+
+    .hero-actions .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+    }
+
+    .irrigation-wrap {
+      margin-top: 2rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .control-card {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid #d9dee3;
+      border-radius: 22px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.1);
+      color: #1f2937;
+    }
+
+    .control-card + .control-card {
+      margin-top: 1rem;
+    }
+
+    .control-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .control-title-row h3 {
+      font-size: 1.65rem;
+      color: #1f2937;
+      margin: 0;
+    }
+
+    .live-feed {
+      font-size: 0.9rem;
+      color: #0f9f6e;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+
+    .dot.off {
+      background: #ef4444;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(140px, 1fr));
+      gap: 1rem;
+    }
+
+    .field-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .field-ring {
+      --p: 70;
+      --ring-color: #3b82f6;
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: conic-gradient(var(--ring-color) calc(var(--p) * 1%), #dbe3ec 0);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .field-ring-inner {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-head);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .field-label {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1f2937;
+      line-height: 1.1;
+    }
+
+    .field-sub {
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+
+    .irrigation-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.1rem;
+      flex-wrap: wrap;
+    }
+
+    .irrigation-meta h4 {
+      font-size: 2rem;
+      margin: 0;
+      color: #1f2937;
+    }
+
+    .irrigation-meta p {
+      margin: 0.2rem 0 0;
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+
+    .auto-badge {
+      display: inline-block;
+      margin-left: 0.8rem;
+      padding: 0.25rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid #10b981;
+      color: #10b981;
+      font-size: 0.78rem;
+      font-weight: 700;
+      vertical-align: middle;
+    }
+
+    .mode-pills {
+      display: flex;
+      gap: 0.45rem;
+    }
+
+    .mode-pill {
+      border: 1px solid #d1d5db;
+      border-radius: 999px;
+      background: #fff;
+      color: #6b7280;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .mode-pill.active {
+      background: #d1fae5;
+      border-color: #10b981;
+      color: #0f9f6e;
+    }
+
+    .irrigation-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .status-row {
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 0.85rem 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.95rem;
+    }
+
+    .status-row h5 {
+      margin: 0;
+      color: #1f2937;
+      font-size: 1.05rem;
+    }
+
+    .status-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .start-btn {
+      border: none;
+      border-radius: 11px;
+      background: #10b981;
+      color: #fff;
+      font-weight: 700;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+
+    .start-btn.off {
+      background: #ef4444;
+    }
+
+    .switch {
+      position: relative;
+      width: 66px;
+      height: 36px;
+      display: inline-block;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #d1d5db;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      left: 4px;
+      top: 4px;
+      border-radius: 50%;
+      background: #fff;
+      transition: 0.2s;
+    }
+
+    .switch input:checked + .slider {
+      background: #10b981;
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(30px);
+    }
+
+    .field-select-label {
+      font-size: 0.76rem;
+      letter-spacing: 0.14em;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .field-select {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 0.7rem 0.8rem;
+      color: #1f2937;
+      font-weight: 600;
+      margin-bottom: 0.95rem;
+      background: #fff;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+
+    .mini-box {
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 0.8rem;
+      background: #fff;
+    }
+
+    .mini-title {
+      color: #6b7280;
+      font-size: 0.8rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .mini-value {
+      color: #0f9f6e;
+      font-size: 1.65rem;
+      font-weight: 800;
+      font-family: var(--font-head);
+      line-height: 1;
+    }
+
+    .valve-panel {
+      border: 1px solid #d1d5db;
+      border-radius: 18px;
+      padding: 1.2rem;
+      text-align: center;
+      background: #fff;
+    }
+
+    .power-circle {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      border: 3px solid #10b981;
+      margin: 0 auto 0.65rem;
+      display: grid;
+      place-items: center;
+      color: #10b981;
+      font-size: 2rem;
+      font-weight: 700;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.13);
+    }
+
+    .valve-label {
+      font-size: 0.8rem;
+      letter-spacing: 0.24em;
+      color: #9ca3af;
+      margin-bottom: 0.35rem;
+    }
+
+    .sensor-state {
+      color: #10b981;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .valve-state {
+      font-family: var(--font-head);
+      font-size: 3rem;
+      line-height: 1;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+
+    .valve-note {
+      color: #4b5563;
+      font-size: 0.92rem;
     }
 
     .hero-stats {
       display: flex;
       gap: 2rem;
-      margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 1px solid var(--border-color);
+      margin-top: 0.5rem;
+      padding: 1rem 1.05rem;
+      border: 1px solid rgba(255, 255, 255, 0.23);
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.22);
       flex-wrap: wrap;
+    }
+
+    .stat-item {
+      min-width: 110px;
     }
 
     .stat-item .stat-val {
       font-family: var(--font-head);
       font-size: 1.8rem;
       font-weight: 800;
-      color: var(--text-primary);
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
     }
 
     .stat-item .stat-lbl {
       font-size: 0.82rem;
-      color: var(--text-muted);
+      color: #d9fce6;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.65);
     }
 
     /* Hero Visual */
     .hero-visual {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: none;
     }
 
     .hero-device {
@@ -355,6 +770,10 @@
         grid-template-columns: 1fr;
       }
 
+      .hero-content {
+        padding: 1.1rem 1rem 1rem;
+      }
+
       .hero-visual {
         display: none;
       }
@@ -370,7 +789,29 @@
       }
 
       .hero-stats {
-        gap: 1rem;
+        gap: 0.75rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width:1000px) {
+      .field-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .irrigation-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width:620px) {
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .control-title-row h3 {
+        font-size: 1.35rem;
       }
     }
   </style>
@@ -406,6 +847,9 @@
 
     <!-- ── Hero ────────────────────────────────────────────── -->
     <section class="hero">
+      <video class="hero-bg-video" autoplay muted loop playsinline>
+        <source src="videos/Smart_Farming_App_Demo_Video.mp4" type="video/mp4">
+      </video>
       <div class="container">
         <div class="hero-grid">
           <div class="hero-content fade-up">
@@ -447,9 +891,6 @@
           </div>
 
           <div class="hero-visual fade-up fade-up-d2">
-            <div class="badge-float badge-float-1">
-              <span>💧</span> Moisture: 72%
-            </div>
             <div class="hero-device">
               <div class="device-header">
                 <div style="font-size:1.5rem">🌱</div>
@@ -499,8 +940,104 @@
                 </div>
               </div>
             </div>
-            <div class="badge-float badge-float-2">
-              <span>🤖</span> AI: No Action Needed
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="irrigation-wrap">
+      <div class="container">
+        <div class="control-card fade-up">
+          <div class="control-title-row">
+            <h3>Live Field Conditions</h3>
+            <div class="live-feed"><span class="dot" id="liveDot"></span><span id="liveFeedText">Live Feed</span></div>
+          </div>
+          <div class="field-grid">
+            <div class="field-item">
+              <div class="field-ring" style="--p:72;--ring-color:#3b82f6">
+                <div class="field-ring-inner">72%</div>
+              </div>
+              <div>
+                <div class="field-label">Moisture</div>
+                <div class="field-sub">Optimal Level</div>
+              </div>
+            </div>
+            <div class="field-item">
+              <div class="field-ring" style="--p:68;--ring-color:#10b981">
+                <div class="field-ring-inner">6.8</div>
+              </div>
+              <div>
+                <div class="field-label">pH Level</div>
+                <div class="field-sub">Near Neutral</div>
+              </div>
+            </div>
+            <div class="field-item">
+              <div class="field-ring" style="--p:66;--ring-color:#f59e0b">
+                <div class="field-ring-inner">24C</div>
+              </div>
+              <div>
+                <div class="field-label">Temperature</div>
+                <div class="field-sub">Ideal for Germination</div>
+              </div>
+            </div>
+            <div class="field-item">
+              <div class="field-ring" style="--p:46;--ring-color:#ef4444">
+                <div class="field-ring-inner">Med</div>
+              </div>
+              <div>
+                <div class="field-label">Nitrogen</div>
+                <div class="field-sub">Needs Improvement</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-card fade-up fade-up-d1">
+          <div class="irrigation-head">
+            <div class="irrigation-meta">
+              <h4>Irrigation Control <span class="auto-badge">AUTO MODE</span></h4>
+              <p>Smart valve automation with soil-based calibration</p>
+            </div>
+            <div class="mode-pills">
+              <button class="mode-pill active" type="button">Auto</button>
+              <button class="mode-pill" type="button">Manual</button>
+            </div>
+          </div>
+          <div class="irrigation-grid">
+            <div>
+              <div class="status-row">
+                <h5>System Status</h5>
+                <div class="status-actions">
+                  <button type="button" class="start-btn" id="sensorStartBtn">Start</button>
+                  <label class="switch">
+                    <input type="checkbox" id="sensorPowerSwitch" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="field-select-label">SOIL CALIBRATION</div>
+              <select class="field-select">
+                <option>Sandy Soil</option>
+                <option>Loamy Soil</option>
+                <option>Clay Soil</option>
+              </select>
+              <div class="mini-grid">
+                <div class="mini-box">
+                  <div class="mini-title">Moisture Range</div>
+                  <div class="mini-value">10% - 25%</div>
+                </div>
+                <div class="mini-box">
+                  <div class="mini-title">Drainage</div>
+                  <div class="mini-value">Fast</div>
+                </div>
+              </div>
+            </div>
+            <div class="valve-panel">
+              <div class="power-circle">|</div>
+              <div class="valve-label">MAIN VALVE</div>
+              <div class="sensor-state" id="sensorStateText">SENSOR ON</div>
+              <div class="valve-state" id="valveStateText">CLOSED</div>
+              <div class="valve-note" id="valveNoteText">Auto mode kept valve closed: moisture 72% is within target.</div>
             </div>
           </div>
         </div>
@@ -644,6 +1181,58 @@
     function toggleNav() {
       document.getElementById('navLinks').classList.toggle('open');
     }
+
+    function areSensorsOn() {
+      const state = localStorage.getItem('soil_sensor_power');
+      return state !== 'off';
+    }
+
+    function setSensorPower(on) {
+      localStorage.setItem('soil_sensor_power', on ? 'on' : 'off');
+    }
+
+    const sensorPowerSwitch = document.getElementById('sensorPowerSwitch');
+    const sensorStartBtn = document.getElementById('sensorStartBtn');
+    const sensorStateText = document.getElementById('sensorStateText');
+    const valveStateText = document.getElementById('valveStateText');
+    const valveNoteText = document.getElementById('valveNoteText');
+    const liveDot = document.getElementById('liveDot');
+    const liveFeedText = document.getElementById('liveFeedText');
+
+    function renderSensorControl() {
+      const on = areSensorsOn();
+
+      if (sensorPowerSwitch) sensorPowerSwitch.checked = on;
+      if (sensorStartBtn) {
+        sensorStartBtn.textContent = on ? 'Stop' : 'Start';
+        sensorStartBtn.classList.toggle('off', on);
+      }
+      if (sensorStateText) sensorStateText.textContent = on ? 'SENSOR ON' : 'SENSOR OFF';
+      if (valveStateText) valveStateText.textContent = on ? 'CLOSED' : 'OFF';
+      if (valveNoteText) {
+        valveNoteText.textContent = on
+          ? 'Auto mode kept valve closed: moisture 72% is within target.'
+          : 'Sensors are off: valve automation is paused until system starts.';
+      }
+      if (liveDot) liveDot.classList.toggle('off', !on);
+      if (liveFeedText) liveFeedText.textContent = on ? 'Live Feed' : 'Feed Paused';
+    }
+
+    if (sensorStartBtn) {
+      sensorStartBtn.addEventListener('click', function () {
+        setSensorPower(!areSensorsOn());
+        renderSensorControl();
+      });
+    }
+
+    if (sensorPowerSwitch) {
+      sensorPowerSwitch.addEventListener('change', function () {
+        setSensorPower(this.checked);
+        renderSensorControl();
+      });
+    }
+    renderSensorControl();
+
     // Auth state
     const u = localStorage.getItem('soil_user');
     if (u) {
